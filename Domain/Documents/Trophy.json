@@ -1,0 +1,43 @@
+
+{
+    "trophies": [
+        {
+            "id": "0",
+        "name" : "Big Spender",
+        "description" : "Spend 100 Lovols at once",
+        "image" : "trophy100lovols"
+        
+        },
+        {
+            "id": "1",
+        "name" : "The Chosen One",
+        "description" : "Qualify for the gameshow.",
+        "image" : "trophyChosenTrophy"
+        
+        },
+        {
+            "id": "2",
+        "name" : "Happy Family",
+        "description" : "Have a full team of 6 members.",
+        "image" : "trophyFullTeam"
+        
+        },
+        {
+            "id": "3",
+        "name" : "Maybe Next Time",
+        "description" : "Qualify for the gameshow, but be eliminiated because an event your team submitted was not valid.",
+        "image" : "trophyQualifyButNotValidEventTrophy"
+        
+        },
+        {
+            "id": "4",
+        "name" : "Sunset",
+        "description" : "Complete a sunset event at least once.",
+        "image" : "trophySunset"
+        
+        }
+        
+      
+  
+    ]
+}

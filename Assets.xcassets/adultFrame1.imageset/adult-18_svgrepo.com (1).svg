@@ -1,0 +1,9 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M829.868 828.587C767.236 891.296 687.411 934.02 600.492 951.351C513.574 968.682 423.467 959.843 341.573 925.951C259.68 892.06 189.679 834.639 140.427 760.953C91.1755 687.268 64.8867 600.63 64.8867 512C64.8867 423.37 91.1755 336.732 140.427 263.047C189.679 189.361 259.68 131.941 341.573 98.0489C423.467 64.1572 513.574 55.3179 600.492 72.6492C687.411 89.9806 767.236 132.704 829.868 195.414" stroke="#FF0000" stroke-width="30" stroke-miterlimit="10"/>
+<path d="M619 330L619.332 672.987" stroke="white" stroke-width="30" stroke-miterlimit="10"/>
+<path d="M556 673L678 672.988" stroke="white" stroke-width="30" stroke-miterlimit="10"/>
+<path d="M566 388L619 387.995" stroke="white" stroke-width="30" stroke-miterlimit="10"/>
+<path d="M757.332 512H1001.81" stroke="white" stroke-width="30" stroke-miterlimit="10"/>
+<path d="M879.359 389.974V634.027" stroke="white" stroke-width="30" stroke-miterlimit="10"/>
+<path d="M228 415.25C228 361.259 292.534 330 349 330C405.468 330 470 361.259 470 415.25C470 512.435 228 584.613 228 671H470" stroke="white" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

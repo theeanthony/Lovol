@@ -1,0 +1,54 @@
+
+{
+    "interests": [
+        {
+            
+            "category" : "Creativity",
+            
+            "specifics" : ["Photography", "Art", "Crafts", "Dancing", "Design", "Make-up", "Making videos", "Singing", "Writing"]
+        
+        },
+        {
+            "category" : "Pets",
+            
+            "specifics" : ["Rabbits","Birds", "Cats", "Dogs", "Fish", "Lizards", "Snakes", "Turtles", "Insects"]
+        },
+        {
+            "category" : "Sports",
+            
+            "specifics" : ["Athletics", "Badminton", "Baseball", "Basketball", "Bouldering","Bowling","Boxing","Crewing","Cricket","Cycling","Chess","Football","Go Karting","Gymnastics","Gym","Golf","Handball", "Hockey","Horseriding","Mixed Martial Arts", "Netball", "Pilates","Ping Pong", "Rugby","Running","Skateboarding","Skiing","Snowboarding","Soccer","Swimming","Tennis", "Volleyball","Wrestling","Waterpolo","Yoga"]
+            
+        },
+        {
+            "category": "Film and Tv",
+            "specifics" : ["Action and Adventure", "Animated", "Anime","Bollywood", "Comedy", "Cooking Shows", "Crime", "Documentaries", "Drama", "Fantasy", "Gameshows", "Horror","Indie","K-Drama", "Myster", "Reality Tv", "Rom-Com", "Romance", "Sci-Fi","Superhero","Telenovelas", "Thriller"]
+        },
+        {
+            "category": "Going Out",
+            "specifics" : ["Bars", "Beach", "Cafe-Hopping","Clubs","Concerts","Downtown","Duck Feeding","Festivals","Karoake","Musuems", "Theatre","Zoo"]
+        },
+        {
+            "category": "Staying In",
+            "specifics" : ["Baking", "Boardgames","Cooking","Disney+","Gardening","Hulu","Netflix","Videogames"]
+        },
+        {
+            "category": "Food and Drinks",
+            "specifics" : ["Boba","Beer","Coffee","Hamburgers","Fufu","Pizza","Pho","Ramen","Sushi","Sweet Tooth","Tacos","Thai","Tea","Vegan","Vegetarian","Wine"]
+        },
+        {
+            "category": "Traveling",
+            "specifics" : ["Backpacking","Camping","Exploring New Cities","Fishing","Hiking","Hostel-Hopper","Sea Voyager","Road Trips",]
+        },
+        {
+            "category": "Music",
+            "specifics" : ["Hip Hop","Latin", "R&B", "Afro", "Arab","Blues","Classical","Country","Desi","EDM","Electronic","Folk & Acoustic","Funk","House","Indie","Jazz", "K-Pop","Metal","Pop","Punk","Rap","Rock","Soul","Techno"]
+        },
+        {
+            "category": "Reading",
+            "specifics" : ["Action & Adventure","Biographies","Classics","Comedy","Comic Books","Crime","Fantasy","History","Horror","Manga","Mystery","Philosophy","Poetry","Psychology","Romance","Sci-Fi","Science","Thriller"]
+        }
+  
+    ]
+}
+
+

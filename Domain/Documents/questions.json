@@ -1,0 +1,145 @@
+{
+    "questions": [
+        {
+            "id" : "0",
+            
+            "question" :  "Where do I enjoy the room's attention being casted on?",
+
+            
+            "leftAnswer": "I enjoy being the center of attention"
+            ,
+            "rightAnswer": "I enjoy watching the spotlight casted onto someone else"
+       
+            
+            
+        
+        },
+        {
+            "id" : "1",
+
+            "question" : "How often am I on my phone?",
+            
+            "leftAnswer": "I only use it to text"
+            ,
+            "rightAnswer": "I'm scrolling for hours"
+            
+        },
+        {
+            "id" : "2",
+
+            "question" : "How do I view exercise?"",
+            "leftAnswer":  "I exercise frequently and take fitness seriously"
+            ,
+            "rightAnswer": "It is not important"
+        },
+        {
+            "id" : "3",
+
+            "question" : "How do I handle conflict?",
+            "leftAnswer": "I try to avoid conflict"
+            ,
+            "rightAnswer": "I confront conflict head on despite it being uncomfortable"
+        },
+        {
+            "id" : "4",
+
+            "question" : "How do I recharge my battery?",
+            "leftAnswer":  "I recharge best when I am alone"
+            ,
+            "rightAnswer": "I recharge best when I am with other people"
+            
+        },
+        {
+            "id" : "5",
+
+            "question" : "How do I hold onto resentment?",
+            "leftAnswer":  "I forgive immediately"
+            ,
+            "rightAnswer":"I can hold a grudge until I die"
+        },
+        {
+            "id" : "6",
+
+            "question" : "How do I view other people's opinions",
+            "leftAnswer":"I am an open book"
+            ,
+            "rightAnswer":"I am a locked safe"
+        },
+        {
+            "id" : "7",
+
+            "question" : "How do I go throughout my day?",
+            "leftAnswer":"I follow a strict schedule"
+            ,
+            "rightAnswer":"I go with the flow and do whatever pops up"
+            
+        },
+        {
+            "id" : "8",
+
+            "question" : "How do I view the idea of people being imprisoned as a form of punishment?",
+            "leftAnswer": "It is inhumane"
+            ,
+            "rightAnswer":"It is efficient"
+            
+        },
+        {
+            "id" : "9",
+
+            "question" : "How do I view other people's opinions about me?",
+            "leftAnswer":"I will change something about myself to fit in"
+            ,
+            "rightAnswer":"I don't care about what others think about me"
+            
+        },
+        {
+            "id" : "10",
+
+            "question" : "How do I view physical appearances?",
+            "leftAnswer":"Physical appearance is important to me"
+            ,
+            "rightAnswer":"Inside is what matters most"
+            
+        },
+        {
+            "id" : "11",
+
+            "question" : "Who would I rather surround myself with?",
+            "leftAnswer": "Simple individuals"
+            ,
+            "rightAnswer":"Complex individuals"
+            
+        },
+        {
+            "id" : "12",
+
+            "question" : "How do I handle peer pressure?",
+            "leftAnswer": "If all my friends were doing it, I would do it"
+            ,
+            "rightAnswer":"If I feel strongly about something, I wont let others influence me"
+            
+        },
+        {
+            "id" : "13",
+
+            "question" : "How prevalent is death in my life?",
+            "leftAnswer":"I've had people close to me die"
+            ,
+            "rightAnswer":"I have not experienced death"
+            
+        },
+        {
+            "id" : "14",
+
+            "question" : "Would I help my best friend get away with murder?",
+            "leftAnswer":"I would ask no questions and help them"
+            ,
+            "rightAnswer":"I would turn them in"
+            
+        }
+    
+        
+    ]
+}
+
+
