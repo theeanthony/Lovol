@@ -96,7 +96,7 @@ class AppColor{
     static let storeDarkOrange = Color(hex:"BF5F39")
     static let chatBubbleGray = Color(hex:"D6D4DC")
     
-    static let lovolOrange = Color(hex:"DE8046")
+    static let lovolChooseOrange = Color(hex:"DE8046")
     
 //    static let chatBubbleTeal = Color(hex:"097179")
 //    static let sensualPurple = Color(hex:"390040")

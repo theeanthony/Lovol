@@ -9,6 +9,7 @@
 import SwiftUI
 import Firebase
 import UserNotifications
+import UIKit
 
 import FirebaseMessaging
 import FirebaseCore
@@ -65,6 +66,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
 
         application.registerForRemoteNotifications()
+        window = UIWindow(frame: UIScreen.main.bounds)
+        
+        // Set the root view controller
+
       return true
     }
     
@@ -107,16 +112,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         return false
     }
-    
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("I have received a url from custom scheme \(url.absoluteString)")
-        if let dynamicLink = DynamicLinks.dynamicLinks().dynamicLink(fromCustomSchemeURL: url){
+        if let dynamicLink = DynamicLinks.dynamicLinks().dynamicLink(fromCustomSchemeURL: url) {
             self.handleIncomingDynamicLink(dynamicLink)
             return true
-        }else{
+        } else {
+            if url.scheme == "messages" {
+                // Handle custom URL scheme
+                print("url scheme is messages")
+                
+                let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+                            
+                if let pathComponents = urlComponents?.path.split(separator: "/"), pathComponents.count == 3 {
+                    let senderId = pathComponents[1]
+                    let recipientId = pathComponents[2]
+                    
+                    print("senderId: \(senderId), recipientId: \(recipientId)")
+                    let newWindow = UIWindow(frame: UIScreen.main.bounds)
+                    let frontChatView = FrontChatView()
+                    let hostingController = UIHostingController(rootView: frontChatView)
+                    newWindow.rootViewController = hostingController
+
+                     
+                     // Set the new window as the main window
+                     self.window = newWindow
+                     self.window?.makeKeyAndVisible()
+                    return true
+                }
+            }
             return false
         }
     }
+
     
     
     func application(_ application: UIApplication,
@@ -256,3 +284,5 @@ extension AppDelegate: MessagingDelegate {
   // [END refresh_token]
     
 }
+
+

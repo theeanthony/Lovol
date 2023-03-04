@@ -1000,6 +1000,7 @@
 		1B7825FC28FF6FCF00EAAB00 = {
 			isa = PBXGroup;
 			children = (
+				1B7A12A729B2C21B0080458F /* ViewControllers */,
 				1B7A4A3029387502006CBF94 /* lovol-v2--iOS--Info.plist */,
 				1B78266328FF773D00EAAB00 /* GoogleService-Info.plist */,
 				1BC4214A290C3618000D1E4F /* Assets.xcassets */,
@@ -1291,6 +1292,13 @@
 				1B8BAF13297654B800E268D3 /* SetSuggestionSheet.swift */,
 			);
 			path = Suggestions;
+			sourceTree = "<group>";
+		};
+		1B7A12A729B2C21B0080458F /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewControllers;
 			sourceTree = "<group>";
 		};
 		1B7A4A0A2938746E006CBF94 /* CustomFont */ = {
