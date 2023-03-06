@@ -144,7 +144,7 @@ struct AddEventView: View {
         .ignoresSafeArea(.keyboard)
         .showLoading(uploadingEvent)
         .background(
-            LinearGradient(gradient: Gradient(colors: [AppColor.lovolPinkish, AppColor.lovolOrange] ), startPoint: .top, endPoint: .bottom)
+            AppColor.lovolDark
          
            
         )

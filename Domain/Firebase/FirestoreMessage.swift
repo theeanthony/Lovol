@@ -9,7 +9,7 @@ import Foundation
 
 struct FirestoreMessage: Codable{
     let message: String
-    let timestamp: String
+    let timestamp: String?
     let senderId: String
     let senderName: String
 //    let recipientId:String

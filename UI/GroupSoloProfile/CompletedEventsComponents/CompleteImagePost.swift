@@ -73,7 +73,7 @@ struct CompleteImagePost: View {
                     .fullScreenCover(isPresented: $showBigVersion) {
                         VStack{
                             Spacer()
-                            ImagePost(completedEvent: completedEvent)
+                            ImagePost(completedEvent: completedEvent,isOverlayShowing:false)
                                 .frame(height:geo.size.height * 5)
                             Spacer()
           

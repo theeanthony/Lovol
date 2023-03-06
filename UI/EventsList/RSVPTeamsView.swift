@@ -42,35 +42,37 @@ struct RSVPTeamsView: View {
                         Spacer()
                         }
                         
-                    }
-                    Text("Teams Attending: \(teamsAtteding.count)")
-                        .font(.custom("Rubik Bold", size: 12)).foregroundColor(.white)
-                        .padding()
+                    }else{
+                        Text("Teams Attending: \(teamsAtteding.count)")
+                            .font(.custom("Rubik Bold", size: 12)).foregroundColor(.white)
+                            .padding()
 
-                    ScrollView{
-                        ForEach(teamInfo,id:\.self){
-                            team in
-                            HStack{
-                                Image(uiImage: team.teamPic)
-                                    .resizable()
-                                    .centerCropped()
-                                    .frame(width: geo.size.width * 0.15, height: geo.size.width * 0.15)
-                                    .aspectRatio(contentMode: .fill)
-                                    .clipShape(Circle())
-                                Text(team.teamName).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
-                                Spacer()
-    //                            Text("View Profile")
-    //                                .padding(5)
-    //                                .background(RoundedRectangle(cornerRadius: 30).fill(.white).opacity(0.6))
-    //                                .font(.custom("Rubik Regular", size: 10)).foregroundColor(AppColor.lovolDarkerPurpleBackground)
-                                
-                                
+                        ScrollView{
+                            ForEach(teamInfo,id:\.self){
+                                team in
+                                HStack{
+                                    Image(uiImage: team.teamPic)
+                                        .resizable()
+                                        .centerCropped()
+                                        .frame(width: geo.size.width * 0.15, height: geo.size.width * 0.15)
+                                        .aspectRatio(contentMode: .fill)
+                                        .clipShape(Circle())
+                                    Text(team.teamName).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+                                    Spacer()
+        //                            Text("View Profile")
+        //                                .padding(5)
+        //                                .background(RoundedRectangle(cornerRadius: 30).fill(.white).opacity(0.6))
+        //                                .font(.custom("Rubik Regular", size: 10)).foregroundColor(AppColor.lovolDarkerPurpleBackground)
+                                    
+                                    
+                                }
                             }
+                            
                         }
-                        
+                        .padding()
+                        .padding(.top,30)
                     }
-                    .padding()
-                    .padding(.top,30)
+   
                 }
                 
 

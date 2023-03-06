@@ -69,7 +69,7 @@ struct FrontProfileView: View {
                                         Button {
                                             
                                         } label: {
-                                            NavigationLink(destination: Member_Alliances_Requests(groupId: groupId, teamInfo:teamInfo)) {
+                                            NavigationLink(destination: Member_Alliances_Requests(groupId: groupId, teamInfo:teamInfo,isFromNotification:false)) {
                                                 HStack{
                                                     Text("Team Members")
                                                     Spacer()

@@ -249,7 +249,7 @@ struct MemberFrame: View {
         
     }
     private func cancelRequest(index: Int ){
-        requestViewModel.cancelRequest(id: requests[index].request.sendingRequestId) {
+        requestViewModel.cancelRequest(id: requests[index].request.id) {
             requests.remove(at: index)
         }
     }

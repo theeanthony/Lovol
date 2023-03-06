@@ -1108,6 +1108,7 @@ class ProfilesViewModel: NSObject, ObservableObject{
                     onCompletion(.failure(.downloadError))
                     return
                 }
+                print("ID of alliance \(id)")
                 let groupId = groupDocument.get("id") as! String
 
                 let teamName = groupDocument.get("teamName") as! String
@@ -1184,7 +1185,8 @@ class ProfilesViewModel: NSObject, ObservableObject{
                     "nameOfSender" : sendingTeam.teamName,
                     "sendRole" : "Team",
                     
-                    "sendingRequestId": sendingTeam.id
+                    "sendingRequestId": id
+//                    "documentId" :randomId
                     
                 
                 ])
@@ -1600,17 +1602,17 @@ class ProfilesViewModel: NSObject, ObservableObject{
     func fetchOtherTeamProfile(groupId:String,onCompletion:@escaping(Result<AllianceModel,DomainError>)->()){
         
     }
-    func sendGroupMessage(groupId: String, message: String, isOwn:Bool){
+    func sendGroupMessage(groupId: String, message: String, isOwn:Bool,teamNameTalkingTo:String){
         
         if isOwn{
-            sendGroup(groupId:groupId,message:message)
+            sendGroup(groupId:groupId,message:message,teamNameTalkingTo:teamNameTalkingTo)
         }else{
-            sendAllianceMessage(groupId:groupId,message:message)
+            sendAllianceMessage(groupId:groupId,message:message,teamNameTalkingTo:teamNameTalkingTo)
         }
 
 
     }
-    func sendAllianceMessage(groupId:String,message:String){
+    func sendAllianceMessage(groupId:String,message:String,teamNameTalkingTo:String){
         fetchMember { result in
             switch result {
             case .success(let user):
@@ -1622,7 +1624,9 @@ class ProfilesViewModel: NSObject, ObservableObject{
                                      "timestamp" : FieldValue.serverTimestamp(),
                                      "senderName" : user.name,
                                      "senderGroupId" : user.groupId,
-                                     "recipientId" : groupId
+                                     "recipientId" : groupId,
+                                     "teamNameTalkingTo" : teamNameTalkingTo
+                                     
 
                                     ])
             case .failure(let error):
@@ -1630,7 +1634,7 @@ class ProfilesViewModel: NSObject, ObservableObject{
             }
         }
     }
-    func sendGroup(groupId:String,message:String){
+    func sendGroup(groupId:String,message:String,teamNameTalkingTo:String){
         fetchMember { result in
             switch result {
             case .success(let user):
@@ -1643,7 +1647,9 @@ class ProfilesViewModel: NSObject, ObservableObject{
                                      "senderId" : self.userId!,
                                      "timestamp" :  FieldValue.serverTimestamp(),
                                      "senderName" : user.name,
-                                     "recipientId" : groupId
+                                     "recipientId" : groupId,
+                                     "teamNameTalkingTo" : teamNameTalkingTo
+
 
                                     ])
             case .failure(let error):
@@ -1679,11 +1685,13 @@ class ProfilesViewModel: NSObject, ObservableObject{
                 for (key, value) in dict {
 
                 if let value = value as? Timestamp {
+
                     let formatter = DateFormatter()
                     let newValue = value.dateValue()
                     formatter.dateStyle = .short
                     formatter.timeStyle = .none
                     dict[key] = formatter.string(from: newValue)
+//                    print("new date \(String(describing: dict[key]))")
                    }
                  }
 //
@@ -1713,58 +1721,47 @@ class ProfilesViewModel: NSObject, ObservableObject{
         return listener
     }
     func listenToGroupMessages(groupId: String, onUpdate: @escaping (Result<[MessageModel], DomainError>) -> ()) -> ListenerRegistration{
-        
+
         print("inside listen to group messages \(groupId)")
-        
+
         let listener = db.collection("group_v2").document(groupId).collection("messages").order(by: "timestamp", descending: false).addSnapshotListener({ querySnapshot, error in
             guard let documents = querySnapshot?.documents, error == nil else {
                 onUpdate(.failure(.downloadError))
                 return
             }
 
+            var messages: [MessageModel] = []
 
+            for document in documents {
 
-            let messages: [MessageModel] = documents.compactMap{ document in
-//
-                let decoder = JSONDecoder()
-                var dict = document.data()
-//
-                for (key, value) in dict {
-
-                if let value = value as? Timestamp {
-
-                    let formatter = DateFormatter()
-                    let newValue = value.dateValue()
-                    formatter.dateStyle = .short
-                    formatter.timeStyle = .none
-                    dict[key] = formatter.string(from: newValue)
-                    print("new date \(String(describing: dict[key]))")
-                   }
-                 }
-//
-                let data = try? JSONSerialization.data(withJSONObject: dict, options:[])
-
+                var data = document.data()
+                
+                if let timestamp = data["timestamp"] as? Timestamp {
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateStyle = .short
+                    dateFormatter.timeStyle = .none
+                    let date = dateFormatter.string(from: timestamp.dateValue())
+                    data["timestamp"] = date
+                }
+                
                 do {
-//                    let dateFormatter = DateFormatter()
-//                    dateFormatter.dateFormat = "mm/dd/yy"
-//                    decoder.dateDecodingStrategy = .formatted(dateFormatter)
-                    let firestoreMessage = try decoder.decode(FirestoreMessage.self, from: data!)
-                    return MessageModel.from(id: document.documentID, firestoreMessage, currentUserId: self.userId!, name: firestoreMessage.senderName)
-                    
+                    let jsonData = try JSONSerialization.data(withJSONObject: data, options: [])
+                    let firestoreMessage = try JSONDecoder().decode(FirestoreMessage.self, from: jsonData)
+                    let message = MessageModel.from(id: document.documentID, firestoreMessage, currentUserId: self.userId!, name: firestoreMessage.senderName)
+                    messages.append(message)
                 }
                 catch{
                     print(error)
-                    return nil
                 }
-
             }
+
             onUpdate(.success(messages))
 
-            })
-
+        })
 
         return listener
     }
+
  
     
     

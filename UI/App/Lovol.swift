@@ -58,15 +58,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
-
+        
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(
-          options: authOptions,
-          completionHandler: { _, _ in }
+            options: authOptions,
+            completionHandler: { granted, error in
+                if let error = error {
+                    print("Failed to request authorization for notifications: \(error.localizedDescription)")
+                }
+            }
         )
 
         application.registerForRemoteNotifications()
         window = UIWindow(frame: UIScreen.main.bounds)
+        
+        if let launchOptions = launchOptions,
+           let url = launchOptions[UIApplication.LaunchOptionsKey.url] as? URL {
+            self.application(application, open: url, options: [:])
+        }
         
         // Set the root view controller
 
@@ -114,7 +123,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("I have received a url from custom scheme \(url.absoluteString)")
+
         if let dynamicLink = DynamicLinks.dynamicLinks().dynamicLink(fromCustomSchemeURL: url) {
+            print("in here")
             self.handleIncomingDynamicLink(dynamicLink)
             return true
         } else {
@@ -141,9 +152,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     return true
                 }
             }
+            else if url.scheme == "post" {
+                print("url scheme is post")
+                
+                let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+                            
+                if let pathComponents = urlComponents?.path.split(separator: "/"), pathComponents.count == 3 {
+                    let recipientId = pathComponents[1]
+                    let postId = pathComponents[2]
+                    
+                    print("recipientId: \(recipientId), postId: \(recipientId)")
+    //                    let newWindow = UIWindow(frame: UIScreen.main.bounds)
+    //                    let frontChatView = FrontChatView()
+    //                    let hostingController = UIHostingController(rootView: frontChatView)
+    //                    newWindow.rootViewController = hostingController
+    //
+    //
+    //                     // Set the new window as the main window
+    //                     self.window = newWindow
+    //                     self.window?.makeKeyAndVisible()
+                    return true
+                }
+            }
             return false
         }
     }
+
 
     
     
@@ -175,6 +209,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
          print("Message ID: \(messageID)")
        }
 
+           print(" 1")
        // Print full message.
        print(userInfo)
 
@@ -216,11 +251,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
          Messaging.messaging().appDidReceiveMessage(userInfo)
         // [START_EXCLUDE]
         // Print message ID.
+        if let deepLink = userInfo["gcm.notification.deepLink"] as? String {
+            // Handle the URL scheme here
+            print("Received notification with URL: \(deepLink)")
+        }
         if let messageID = userInfo[gcmMessageIDKey] {
             print("Message ID: \(messageID)")
         }
         // [END_EXCLUDE]
         // Print full message.
+        print(" 2")
+
         print(userInfo)
         
         // Change this to your preferred presentation option
@@ -239,8 +280,208 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
       // With swizzling disabled you must let Messaging know about the message, for Analytics
        Messaging.messaging().appDidReceiveMessage(userInfo)
       // Print full message.
+            print(" 3")
+        if let deepLink = userInfo["gcm.notification.deepLink"] as? String {
+            print("Received notification with URL: \(deepLink)")
+            if let url = URL(string: deepLink) {
+                
+                print("URL SCHEME \(String(describing: url.scheme))")
+                
+                if url.scheme == "messages" {
+                    // Handle custom URL scheme for messages
+                    print("url scheme is messages")
+                    
+                    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false){
+                    print("URL COMPONENTS \(String(describing: urlComponents))")
+//                    if let pathComponents = urlComponents?.path.split(separator: "/"), pathComponents.count == 3 {
+                        let pathComponents = urlComponents.path.split(separator: "/")
+                       
+                       print("path components size \(pathComponents.count) and \(pathComponents)")
+//                        let senderId = String(pathComponents[1])
+                        let recipientId = String(pathComponents[0])
+                        let name = String(pathComponents[1])
+                        let senderGroupId = String(pathComponents[2])
+                        
+                        
+                        //                        print("senderId: \(senderId), recipientId: \(recipientId)")
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let currentViewController = windowScene.windows.first?.rootViewController {
+                            currentViewController.dismiss(animated: false, completion: nil)
+                            let newWindow = UIWindow(frame: UIScreen.main.bounds)
+                            let profilesViewModel = ProfilesViewModel()
+                            //                        GroupChatView(match: $chosenMessage,groupId:teamInfo.id)
+                            
+                            @State var chatModel : ChatModel = ChatModel(id: recipientId, groupId: recipientId, name: name, picture: UIImage(), lastMessage: "")
+                            
+                            print("recipeint id \(recipientId) and name \(name) and senderGroupId \(senderGroupId)")
+                      
+                            let frontChatView = GroupChatView(match:$chatModel,groupId:senderGroupId, fromNotification: true)
+                                        .environmentObject(profilesViewModel) // inject profilesViewModel as an environment object
+                                       
+                                    
+                                    let hostingController = UIHostingController(rootView: frontChatView)
+                                    hostingController.modalPresentationStyle = .fullScreen // set the presentation style to full screen
+
+                                    newWindow.rootViewController = hostingController
+                                    currentViewController.present(hostingController, animated: true, completion: nil)
+                                    
+                                    print("new window")
+                                    
+                                    // Set the new window as the main window
+                                    self.window = newWindow
+                                    self.window?.makeKeyAndVisible()
+                   
+                            
+                            //                        return true
+                            //                    }
+                        }
+                    }
+                }
+                else if url.scheme == "post" {
+                    // Handle custom URL scheme for posts
+                    print("url scheme is post")
+                    
+                    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false){
+                    print("urlComponents: \(String(describing: urlComponents))")
+
+                     let pathComponents = urlComponents.path.split(separator: "/")
+                        
+                        print("path components size \(pathComponents.count) and \(pathComponents)")
+//                        let recipientId = String(pathComponents[1])
+                        let documentId = String(pathComponents[0])
+                        
+                        print("recipientId: \(documentId), postId: \(documentId)")
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let currentViewController = windowScene.windows.first?.rootViewController {
+                            currentViewController.dismiss(animated: false, completion: nil)
+                            let newWindow = UIWindow(frame: UIScreen.main.bounds)
+                            let eventViewModel = EventViewModel()
+                            
+                            let profileViewModel = ProfilesViewModel()
+
+                            
+                            eventViewModel.fetchSingleCompletedEvent(id: documentId) { result in
+                                switch result{
+                                case .success(let event):
+                                    var fetchedEvent = event
+                                    
+                                    let imagePostView = ImagePost(completedEvent: fetchedEvent,isOverlayShowing: true)
+                                        .environmentObject(eventViewModel)
+                                        .environmentObject(profileViewModel) // inject profilesViewModel as an environment object
+
+//
+                                    let hostingController = UIHostingController(rootView: imagePostView)
+                                    hostingController.modalPresentationStyle = .fullScreen // set the presentation style to full screen
+                                    newWindow.rootViewController = hostingController
+                                    currentViewController.present(hostingController, animated: true, completion: nil)
+                                    
+                                case .failure(let error):
+                                    print("error fetching event \(error)")
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        print("URL path does not contain three components")
+                    }
+                }
+                else if url.scheme == "comment" {
+                    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false){
+                    print("urlComponents: \(String(describing: urlComponents))")
+
+                     let pathComponents = urlComponents.path.split(separator: "/")
+                        
+                        print("path components size \(pathComponents.count) and \(pathComponents)")
+//                        let recipientId = String(pathComponents[1])
+                        let documentId = String(pathComponents[0])
+                        
+                        print("recipientId: \(documentId), postId: \(documentId)")
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let currentViewController = windowScene.windows.first?.rootViewController {
+                            currentViewController.dismiss(animated: false, completion: nil)
+                            let newWindow = UIWindow(frame: UIScreen.main.bounds)
+                            let eventViewModel = EventViewModel()
+                            
+                          
+                            let commentView = CommentsView(eventId:documentId)
+                                        .environmentObject(eventViewModel)
+                                      
+//
+                                    let hostingController = UIHostingController(rootView: commentView)
+                                    hostingController.modalPresentationStyle = .fullScreen // set the presentation style to full screen
+                                    newWindow.rootViewController = hostingController
+                                    currentViewController.present(hostingController, animated: true, completion: nil)
+                                    
+                           
+                        }
+                    }
+                    else {
+                        print("URL path does not contain three components")
+                    }
+                }
+                else if url.scheme == "request" {
+                    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false){
+                    print("urlComponents: \(String(describing: urlComponents))")
+
+                     let pathComponents = urlComponents.path.split(separator: "/")
+                        
+                        print("path components size \(pathComponents.count) and \(pathComponents)")
+//                        let recipientId = String(pathComponents[1])
+                        let recipientId = String(pathComponents[0])
+                        
+                        print("recipientId: \(recipientId), postId: \(recipientId)")
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let currentViewController = windowScene.windows.first?.rootViewController {
+                            currentViewController.dismiss(animated: false, completion: nil)
+                            let newWindow = UIWindow(frame: UIScreen.main.bounds)
+                            let profileViewModel = ProfilesViewModel()
+                            let firestoreViewModel = FirestoreViewModel()
+                            let requestViewModel = RequestViewModel()
+
+                            profileViewModel.fetchTeam(id: recipientId) { result in
+                                switch result{
+                                case .success(let team):
+                                    let commentView = Member_Alliances_Requests(groupId:recipientId, teamInfo: team , isFromNotification:true)
+                                                .environmentObject(profileViewModel)
+                                                .environmentObject(firestoreViewModel)
+                                                .environmentObject(requestViewModel)
+                                                .padding(.top,30)
+                                                .background(AppColor.lovolDark)
+                                    
+
+
+        //
+                                            let hostingController = UIHostingController(rootView: commentView)
+                                            hostingController.modalPresentationStyle = .fullScreen // set the presentation style to full screen
+                                            newWindow.rootViewController = hostingController
+                                            currentViewController.present(hostingController, animated: true, completion: nil)
+                                case .failure(let error):
+                                    print("error fetching team for notification \(error)")
+                                    return
+                                }
+                            }
+                            
+                          
+                           
+                                    
+                           
+                        }
+                    }
+                    else {
+                        print("URL path does not contain three components")
+                    }
+                }
+
+                
+            }
+            else{
+                print("Invalid URL: \(deepLink)")
+            }
+        }
+
       print(userInfo)
     }
+    
 //    private func process(_ notification: UNNotification) {
 //      // 1
 //      let userInfo = notification.request.content.userInfo

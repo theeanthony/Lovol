@@ -31,6 +31,10 @@ struct ImagePost: View {
     
     @State private var photoIndex : Int = 0
     
+    var isOverlayShowing : Bool // track whether overlay is showing
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+
+    
     var body: some View {
         GeometryReader { geo in
             VStack(spacing:2){
@@ -181,12 +185,20 @@ struct ImagePost: View {
 //
                         }
                         .padding(.horizontal,7)
-                        .padding(.vertical,10)
+                        .padding(.vertical, isOverlayShowing ? 50 : 10)
+                        
+                     
 
                     )
 
-                }        .frame(height:geo.size.height * 0.75)
+                }
+//                .frame(height:geo.size.height * 0.75)
+                
+                
                     .frame(height:geo.size.width)
+                
+      
+                
 
                 VStack{
                     Button {
@@ -236,12 +248,33 @@ struct ImagePost: View {
                 
                 
             }
+            .overlay(VStack{
+                
+                HStack{
+                    
+                    if isOverlayShowing{
+                        Button {
+                            presentationMode.wrappedValue.dismiss()
+                        } label: {
+                            Image(systemName:"xmark").foregroundColor(.white)
+
+                        }
+                        .padding()
+                        .padding(.top,10)
+                    }
+            
+
+                    Spacer()
+                }
+                Spacer()
+            })
             .frame(width: geo.size.width, height: geo.size.height)
             .onAppear(perform: fillHeart)
 
         }.sheet(isPresented: $reportPic) {
             ReportSheetView(reportId: completedEvent.groupId)
         }
+        .background(AppColor.lovolDark)
 
     }
     private func goThroughPhotos(right:Bool){

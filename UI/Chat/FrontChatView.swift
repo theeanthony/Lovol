@@ -119,10 +119,10 @@ struct FrontChatView: View {
                 })
             .onAppear(perform: onAppear)
             .fullScreenCover(isPresented: $chatFullScreen) {
-                GroupChatView(match: $groupChat, groupId:teamInfo.id)
+                GroupChatView(match: $groupChat, groupId:teamInfo.id,fromNotification: false)
             }
             .fullScreenCover(isPresented: $chatOtherFullScreen) {
-                GroupChatView(match: $chosenMessage,groupId:teamInfo.id)
+                GroupChatView(match: $chosenMessage,groupId:teamInfo.id,fromNotification: false)
             }
             .fullScreenCover(isPresented: $addChat) {
                 

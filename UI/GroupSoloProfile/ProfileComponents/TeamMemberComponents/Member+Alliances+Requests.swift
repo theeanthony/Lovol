@@ -32,7 +32,7 @@ struct Member_Alliances_Requests: View {
     @State private var allianceSearch : AllianceModel = AllianceModel(groupId: "", teamName: "", teamDescription: "", memberModel: [], teamPic: UIImage())
     @State private var loadingSearch : Bool = false
     @State private var requestSent : Bool = false
-    
+    var isFromNotification: Bool 
     @State private var showSearch : Bool = false
     
     @State private var requestSentAlready : Bool = false
@@ -44,9 +44,7 @@ struct Member_Alliances_Requests: View {
             HStack{
                 Image(systemName:"magnifyingglass").foregroundColor(.white)
                 HStack{
-                    
                     TextField("", text: $searchString, axis:.horizontal)
-                    //                                .fixedSize(horizontal: true, vertical: false)
                         .placeholder(when: searchString.isEmpty) {
                             Text("Team #ID").opacity(0.5).font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
                         }.onChange(of: searchString, perform: {newValue in
@@ -54,11 +52,7 @@ struct Member_Alliances_Requests: View {
                                 searchString = String(newValue.prefix(charLimit))
                             }
                         })
-                    
-//                    Text("\(charLimit - searchString.count)").foregroundColor(.white).font(.headline).bold()
-//                        .padding(.trailing,5)
-                    
-                    
+
                 }
                 
                 Spacer()
@@ -80,7 +74,6 @@ struct Member_Alliances_Requests: View {
                     }
                 }
                 if showTeam {
-//                    NavigationLink(destination: AllianceFullFrameView(alliance: allianceSearch)) {
                         GeometryReader{geo in
                             HStack{
                                 Image(uiImage: allianceSearch.teamPic)
@@ -104,8 +97,6 @@ struct Member_Alliances_Requests: View {
                                     AllianceFullFrameView(alliance: allianceSearch)
 
                                 }
-                       
-                                
                                 Spacer()
                                 Button {
                                     sendRequest()
@@ -118,12 +109,7 @@ struct Member_Alliances_Requests: View {
                                         Image(systemName:"person.crop.circle.badge.questionmark")
                                             .foregroundColor(.white)
                                     }
-                                    
-                                    
                                 }
-                                
-                                
-                                
                             }
                             .padding(.horizontal,15)
                         }
@@ -137,19 +123,35 @@ struct Member_Alliances_Requests: View {
                     }
                 }
                 else{
-//                    ScrollView{
-                 
-                 
-                        MemberFrame(groupId: groupId, teamInfo: teamInfo, searchString: $searchString)
+
+                    MemberFrame(groupId: groupId, teamInfo: teamInfo, searchString: $searchString)
                             .padding(.horizontal,5)
-//                    }
                 }
                 Spacer()
             }
-       
-
-            
         }
+        .padding(.top,isFromNotification ? 30 : 0)
+        .overlay(
+            
+                VStack{
+                    HStack{
+                        if isFromNotification{
+                            Button {
+                                presentationMode.wrappedValue.dismiss()
+                            } label: {
+                                Image(systemName:"xmark").foregroundColor(.white)
+                            }
+                            .padding(.horizontal)
+
+
+
+                    }
+
+                      Spacer()
+                    }
+                    Spacer()
+                }
+           )
         .ignoresSafeArea(.keyboard)
         .frame(maxWidth:.infinity,maxHeight:.infinity)
         .background(BackgroundView())

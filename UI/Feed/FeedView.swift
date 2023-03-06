@@ -56,7 +56,7 @@ struct FeedView: View {
                                 ForEach(completedEvents.indices, id: \.self){ index in
                                     
                                     
-                                    ImagePost(completedEvent: completedEvents[index])
+                                    ImagePost(completedEvent: completedEvents[index], isOverlayShowing: false)
 //                                        .frame(height:geo.size.height * 0.90)
                                         .frame(width: geo.size.width, height: geo.size.height)
                                         .padding(.bottom)

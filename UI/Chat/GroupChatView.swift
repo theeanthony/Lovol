@@ -25,6 +25,8 @@ struct GroupChatView: View {
 //      }
     @Binding var match: ChatModel
     let groupId : String
+    
+     var fromNotification : Bool 
     @State private var typingMessage: String = ""
     @State private var messageList: [MessageModel] = []
     @State private var listener: ListenerRegistration? = nil
@@ -121,10 +123,25 @@ struct GroupChatView: View {
     private func performOnDisappear(){
         listener?.remove()
     }
+    private func fetchProfilePic(){
+        profileViewModel.fetchGroupMainPicture(profileId: match.groupId) { result in
+            switch result{
+            case .success(let image):
+                match.picture = image
+            case .failure (let error):
+                
+                print ("error fetching iage \(error)")
+            }
+        }
+    }
     
     private func performOnAppear(){
         //add grouplistenmessages
         print("In group chat view \(match.groupId)")
+        
+        if fromNotification {
+            fetchProfilePic()
+        }
         if match.groupId == groupId {
             listener = profileViewModel.listenToGroupMessages(groupId: match.groupId, onUpdate: {result in
                 switch result{
@@ -150,7 +167,7 @@ struct GroupChatView: View {
     
     private func sendMessage(){
         
-        profileViewModel.sendGroupMessage(groupId: match.groupId, message: typingMessage, isOwn: match.groupId == groupId )
+        profileViewModel.sendGroupMessage(groupId: match.groupId, message: typingMessage, isOwn: match.groupId == groupId, teamNameTalkingTo: match.name)
             typingMessage = ""
             
 //            firestoreViewModel.sendMessage(matchId: match.id, message: typingMessage)

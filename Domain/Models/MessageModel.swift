@@ -10,7 +10,7 @@ import Foundation
 struct MessageModel: Identifiable, Equatable{
     let id: String
     let isCurrentUser: Bool
-    let timestamp: String
+    let timestamp: String?
     let message: String
     let name: String
     

@@ -239,7 +239,15 @@ class EventViewModel: NSObject, ObservableObject{
         
     }
     private func updateEventStatus(id:String){
+        db.collection("hosted_events_v1").document(id).updateData([
+            "isActive" : false,
+            "isCompleted" : true
         
+        ])
+        db.collection("pending_events").document(id).updateData([
+            "isActive" : false,
+            "isCompleted" : true
+        ])
     }
     
     func fetchEvents(groupId:String, locationSet: Bool, long:Double,lat:Double,onCompletion: @escaping (Result<[EventModel],DomainError>)->()){
@@ -1400,7 +1408,8 @@ class EventViewModel: NSObject, ObservableObject{
                     eventRef.collection("likes").document(self.userId!).setData([
                         "like": true,
                         "groupId": groupId,
-                        "event" : event
+                        "event" : event,
+                        "documentId" : id
                     ])
                     eventRef.updateData([
                         "likes": currentLikes + 1
@@ -1807,6 +1816,44 @@ class EventViewModel: NSObject, ObservableObject{
         
         
     }
+    func fetchSingleCompletedEvent(id: String, onCompletion:@escaping (Result<FetchedEvent,DomainError>) ->()){
+        
+        let fetchedEventRef = db.collection("completed_events").document(id)
+        
+        fetchedEventRef.getDocument { snapshot, error in
+            guard let document = snapshot, error == nil else {
+                print("Error fetching c ompleted events")
+                onCompletion(.failure(.downloadError))
+                return
+            }
+            
+
+                let photoURL = document.get("photoURLS") as! [String]
+                let eventName = document.get("eventName") as! String
+                let eventType = document.get("eventType") as! String
+                let eventMonth = document.get("eventMonth") as! String
+                let groupId = document.get("groupId") as! String
+                let teamName = document.get("teamName") as! String
+                let id = document.get("id") as! String
+                let documentId = document.documentID
+                let likes = document.get("likes") as! Int
+                let commentsNum = document.get("commentNum") as! Int
+                let timeStamp = document.get("timeStamp") as! Timestamp
+                let formatter = DateFormatter()
+                let newValue = timeStamp.dateValue()
+                formatter.dateStyle = .short
+                formatter.timeStyle = .none
+                let time = formatter.string(from: newValue)
+
+                let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId, eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: documentId, likes: likes, comments: commentsNum, didILike: false, timeStamp: time)
+                onCompletion(.success(event))
+                return
+
+            
+        }
+        
+        
+    }
     func fetchCompletedEvents(groupId: String, onCompletion:@escaping (Result<[FetchedEvent],DomainError>) ->()){
         
         let fetchedEventRef = db.collection("completed_events").whereField("groupId", isEqualTo: groupId)
@@ -1830,19 +1877,7 @@ class EventViewModel: NSObject, ObservableObject{
             var completedEvents : [FetchedEvent] = []
             
             for document in documentSnapshot.documents {
-                
-//                var dict = document.data()
-//                for (key, value) in dict {
 
-//                if let value = value as? Timestamp {
-//
-//                    let formatter = DateFormatter()
-//                    let newValue = value.dateValue()
-//                    formatter.dateStyle = .short
-//                    formatter.timeStyle = .none
-//                    dict[key] = formatter.string(from: newValue)
-//                   }
-//                 }
                 let photoURL = document.get("photoURLS") as! [String]
                 let eventName = document.get("eventName") as! String
                 let eventType = document.get("eventType") as! String
@@ -2252,7 +2287,7 @@ class EventViewModel: NSObject, ObservableObject{
     func fetchPendingEvents(groupId:String,onCompletion:@escaping(Result<[HostEvent],DomainError>)->()){
         let groupRef = db.collection("pending_events")
         
-        groupRef.whereField("hostId", isEqualTo:groupId).getDocuments { query, error in
+        groupRef.whereField("hostId", isEqualTo:groupId).whereField("isCompleted",isEqualTo: false).getDocuments { query, error in
             guard let documents = query , error == nil else {
                 onCompletion(.failure(.downloadError))
                 return
