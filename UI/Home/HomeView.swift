@@ -78,7 +78,7 @@ struct HomeView: View {
 //                ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!), isPresented: $isPresented)
 //            }
             .sheet(isPresented: $isPresented) {
-                ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!), isPresented: $isPresented)
+                ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!))
                 
                     .presentationDetents([.large])
 

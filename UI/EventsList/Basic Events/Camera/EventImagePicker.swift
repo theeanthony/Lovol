@@ -1,120 +1,87 @@
 import SwiftUI
+import MobileCoreServices // import for kUTTypeMovie
+import UniformTypeIdentifiers
 import AVFoundation
 
-struct EventImagePicker: UIViewRepresentable {
+struct EventImagePicker: UIViewControllerRepresentable {
+    @Environment(\.presentationMode)  var presentationMode
+    var sourceType: UIImagePickerController.SourceType = .camera
+    @Binding var selectedImage: UIImage
+    @Binding var selectedVideo: URL?
+    func makeUIViewController(context: UIViewControllerRepresentableContext<EventImagePicker>) -> UIImagePickerController {
+        let imagePicker = UIImagePickerController()
+        imagePicker.allowsEditing = false
+        imagePicker.sourceType = sourceType
+        imagePicker.mediaTypes = [UTType.movie.identifier, UTType.image.identifier]
+        imagePicker.videoMaximumDuration = 10.0 // Limit video duration to 10 seconds
+        imagePicker.videoQuality = .typeHigh
 
-    @Binding var takenPhotos: [UIImage]
+        imagePicker.delegate = context.coordinator
+        return imagePicker
+    }
+
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: UIViewControllerRepresentableContext<EventImagePicker>) {
+
+    }
 
     func makeCoordinator() -> Coordinator {
-        let photoOutput = AVCapturePhotoOutput()
-        photoOutput.isHighResolutionCaptureEnabled = true
-        let coordinator = Coordinator(self, photoOutput: photoOutput)
-        return coordinator
+        Coordinator(self)
     }
 
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.8))
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            let captureSession = AVCaptureSession()
-            print("in dispatch")
-            // Check camera device availability
-            guard let captureDevice = AVCaptureDevice.default(for: .video),
-                  let input = try? AVCaptureDeviceInput(device: captureDevice) else {
-                print("Camera device is not available")
-                return
-            }
-            print("camera device is available")
-            
-            // Verify AVCaptureDeviceInput object was created successfully
-            guard captureSession.canAddInput(input) else {
-                print("Could not add AVCaptureDeviceInput to capture session")
-                return
-            }
-            print("capture session verified, \(input)")
-            
-            captureSession.addInput(input)
-            
-            let photoOutput = AVCapturePhotoOutput()
-            photoOutput.isHighResolutionCaptureEnabled = true
-            photoOutput.isLivePhotoCaptureEnabled = false
-            print("photooutput \(photoOutput)")
-            // Verify AVCapturePhotoOutput object was added successfully
-            guard captureSession.canAddOutput(photoOutput) else {
-                print("Could not add AVCapturePhotoOutput to capture session")
-                return
-            }
-            
-            print("capture before session running")
-            captureSession.addOutput(photoOutput)
-            
-            captureSession.startRunning()
-            print("capture session running")
+        var parent: EventImagePicker
 
-            DispatchQueue.main.async {
-                let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-                previewLayer.frame = view.layer.bounds
-                previewLayer.videoGravity = .resizeAspectFill
-                view.layer.addSublayer(previewLayer)
-
-                let takePhotoButton = UIButton(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
-                takePhotoButton.backgroundColor = .white
-                takePhotoButton.layer.cornerRadius = 40
-                takePhotoButton.layer.masksToBounds = true
-                takePhotoButton.center = CGPoint(x: view.frame.width / 2, y: view.frame.height - 80)
-                print("button created ")
-                takePhotoButton.addTarget(context.coordinator, action: #selector(Coordinator.takePhoto), for: .touchUpInside)
-                view.addSubview(takePhotoButton)
-            }
-        }
-
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        // No updates needed
-    }
-
-    class Coordinator: NSObject, AVCapturePhotoCaptureDelegate {
-
-        let parent: EventImagePicker
-        let photoOutput: AVCapturePhotoOutput
-        
-        init(_ parent: EventImagePicker, photoOutput: AVCapturePhotoOutput) {
+        init(_ parent: EventImagePicker) {
             self.parent = parent
-            self.photoOutput = photoOutput
         }
 
-        @objc func takePhoto() {
-            let settings = AVCapturePhotoSettings()
-            settings.flashMode = .auto
-            print("takephotos method activitated")
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             
-            guard let videoConnection = photoOutput.connection(with: .video) else {
-                print("video connection \(String(describing: photoOutput.connection(with: .video)))")
-                print("Could not retrieve video connection")
-                return
+            if let image = info[.originalImage] as? UIImage {
+                parent.selectedImage = image
+            } else if let videoURL = info[.mediaURL] as? URL {
+                    VideoCompressor().compressVideo(inputURL: videoURL) { result in
+                        switch result {
+                        case .success(let compressedURL):
+                            self.parent.selectedVideo = compressedURL
+                        case .failure(let error):
+                            print("Video compression failed: \(error.localizedDescription)")
+                            self.parent.selectedVideo = nil
+                        }
+                    }
+                    
+                
+                parent.presentationMode.wrappedValue.dismiss()
             }
-            videoConnection.videoOrientation = .portrait
-            print("phot capture photo")
-            photoOutput.capturePhoto(with: settings, delegate: self)
         }
 
-        func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-            if let error = error {
-                print("Error capturing photo: \(error.localizedDescription)")
-                return
-            }
-            print("Photo captured successfully")
-            
-            guard let imageData = photo.fileDataRepresentation(), let image = UIImage(data: imageData) else {
-                print("Error converting captured photo to UIImage")
-                return
-            }
-            
-            parent.takenPhotos.append(image)
-            print("Image added to takenPhotos array")
-        }
+    }
+}
+
+
+func generateThumbnail(for videoURL: URL) -> UIImage? {
+    let asset = AVAsset(url: videoURL)
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+
+    let timestamp = CMTime(seconds: 1, preferredTimescale: 60)
+    var image: UIImage?
+
+    do {
+        let cgImage = try generator.copyCGImage(at: timestamp, actualTime: nil)
+        image = UIImage(cgImage: cgImage)
+    } catch {
+        print("Error generating thumbnail: \(error)")
     }
 
+    return image
 }
+//switch result {
+//case .success(let compressedURL):
+//    parent.selectedVideo = compressedURL
+//case .failure(let error):
+//    print("Video compression failed: \(error.localizedDescription)")
+//    parent.selectedVideo = nil
+//}

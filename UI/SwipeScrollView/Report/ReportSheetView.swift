@@ -15,8 +15,11 @@ struct ReportSheetView: View {
     @State private var reportReasons : [String] = ["Bot Account", "Nudity Or Sexual Activity", "Hate Speech Or Symbols", "Suicide or Self-Injury", "Sale of illegal or regulated goods"]
     var body: some View {
         VStack{
+            Spacer()
             
             Text("Please choose the reason why this account is being reported.")
+                .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
+
                 .frame(width:250)
             
             VStack{
@@ -40,8 +43,11 @@ struct ReportSheetView: View {
                 
                 
             }
+            Spacer()
             
         }
+        .font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+        .background(AppColor.lovolDark)
        
     }
     private func report(reason: String){

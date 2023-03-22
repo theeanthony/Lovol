@@ -28,11 +28,15 @@ struct LeaderBoardFrame: View {
     var body: some View {
         
         GeometryReader{geo in
-            VStack{
+//            VStack{
+  
+//                Spacer()
             ScrollView{
                 
                 LeaderBoardTopThree()
                     .frame(width:geo.size.width,height:geo.size.height * 0.3)
+                    .padding(.top,40)
+                
                 
                 Section(header: ListHeader(text: "Others")){
                     
@@ -62,10 +66,12 @@ struct LeaderBoardFrame: View {
                     
                 }
                 .frame(width:geo.size.width * 0.95)
-                Spacer()
+//                Spacer()
             }
-            .frame(height:geo.size.height * 0.9)
-        }
+//            .frame(height:geo.size.height )
+            .padding(.top,20)
+            .padding(.bottom,2)
+//        }
         }
         .onAppear(perform:onAppear)
         .background(BackgroundView())
@@ -73,6 +79,12 @@ struct LeaderBoardFrame: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: btnBack)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar{
+            ToolbarItemGroup(placement:.principal){
+                Text("Top Packs")
+                    .font(.custom("Rubik Bold", size: 22)).foregroundColor(.white)
+            }
+        }
         
     }
     private func onAppear(){

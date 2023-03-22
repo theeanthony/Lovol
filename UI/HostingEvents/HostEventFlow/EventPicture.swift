@@ -4,7 +4,7 @@
 //
 //  Created by Anthony Contreras on 2/20/23.
 //
-
+ 
 import SwiftUI
 
 struct EventPicture: View {
@@ -26,7 +26,7 @@ struct EventPicture: View {
 //                        .centerCropped()
 //                        .frame(width: geo.size.width * 0.3, height: geo.size.width * 0.3)
                     
-                        .aspectRatio(contentMode: .fill)
+                        .aspectRatio(contentMode: .fit)
 //                        .clipShape(Circle())
 //                        .overlay(
 //                            Circle().stroke(.gray,lineWidth:2)
@@ -46,7 +46,7 @@ struct EventPicture: View {
                 }
              
             }
-            .padding(.bottom,40)
+            .padding(.bottom,5)
         }
         .sheet(isPresented: $uploadPictureSheet){
             ContentTypeView(onContentTypeSelected: { contentType in

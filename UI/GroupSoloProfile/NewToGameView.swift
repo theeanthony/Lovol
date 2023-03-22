@@ -75,7 +75,7 @@ struct NewToGameView: View {
                                 Button {
                                     
                                 } label: {
-                                    NavigationLink(destination: AllianceFullFrameView(alliance: allianceSearch)) {
+                                    NavigationLink(destination: AllianceFullFrameView(alliance: $allianceSearch)) {
                                         Text("View Profile")
                                             .padding(5)
                                             .background(RoundedRectangle(cornerRadius: 30).fill(.white).opacity(0.6))

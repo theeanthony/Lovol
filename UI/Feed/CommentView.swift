@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CommentView: View {
     var comment : CommentModel
+    @State private var groupId : String = ""
     var body: some View {
         
         VStack{
@@ -36,7 +37,7 @@ struct CommentView: View {
                 Button {
                     
                 } label: {
-                    NavigationLink(destination: VisitGroupProfile(groupId:comment.teamId)) {
+                    NavigationLink(destination: OtherTeamProfileView(groupId:$groupId)) {
 
                     Text(comment.name)
                         .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
@@ -64,8 +65,12 @@ struct CommentView: View {
         }
         
 //        .padding()
+        .onAppear(perform:onAppear)
    
 
+    }
+    private func onAppear(){
+        self.groupId = comment.teamId
     }
 }
 

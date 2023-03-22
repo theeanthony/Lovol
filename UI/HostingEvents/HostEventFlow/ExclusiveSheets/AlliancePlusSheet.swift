@@ -37,7 +37,7 @@ struct AlliancePlusSheet: View {
             }
             Spacer()
         }
-        .background(AppColor.lovolDarkerPurpleBackground)
+        .background(AppColor.lovolDark)
     }
 }
 

@@ -24,6 +24,8 @@ struct EnlargedPhotoView: View {
                     } label: {
                         Image(systemName:"xmark")
                             .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(AppColor.lovolDark)).opacity(0.6)
                     }
                
 
@@ -58,6 +60,7 @@ struct EnlargedPhotoView: View {
             }
             .frame(width:geo.size.width, height:geo.size.height)
             .background(.black.opacity(0.3))
+            .ignoresSafeArea()
 //            .position(x:UIScreen.main.bounds.width/2,y: geo.size.height / 2)
 
         }

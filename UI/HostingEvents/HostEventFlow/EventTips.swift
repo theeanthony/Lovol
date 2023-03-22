@@ -19,7 +19,9 @@ struct EventTips: View {
             .padding()
 //                                .fixedSize()
             .placeholder(when: eventTips.isEmpty) {
-            Text("").opacity(0.5).font(.custom("Rubik Regular", size: 28)).foregroundColor(.white)
+            Text("Add Event Tips").opacity(0.5).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+                    .padding()
+                    .padding()
         }.onChange(of: eventTips, perform: {newValue in
             if(newValue.count >= charLimit){
                 eventTips = String(newValue.prefix(charLimit))

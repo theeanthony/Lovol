@@ -21,14 +21,18 @@ import FirebaseDynamicLinks
 struct lovol: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+    @StateObject private var appState = AppState()
+
     @StateObject var authViewModel = AuthViewModel()
     @StateObject var firestoreViewModel = FirestoreViewModel()
     @StateObject var locationViewModel = LocationViewModel()
     @StateObject var profileViewModel = ProfilesViewModel()
     @StateObject var eventViewModel = EventViewModel()
     @StateObject var requestViewModel = RequestViewModel()
-    
+    @Environment(\.openURL) var openURL
+    @State private var shouldShowInviteAlert = false
+    @State private var teamName : String = ""
+    @State private var teamId : String = ""
     
 //    @StateObject private var store = LocalStore()
 
@@ -42,16 +46,94 @@ struct lovol: App {
                 .environmentObject(profileViewModel)
                 .environmentObject(eventViewModel)
                 .environmentObject(requestViewModel)
+                .environmentObject(appState)
+
+                .onOpenURL { url in
+                    print("URL \(url.absoluteString)")
+                    
+                    if let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+                       let queryItems = components.queryItems {
+                        
+                        for item in queryItems {
+                            print("name: \(item.name), value: \(item.value ?? "")")
+                        }
+                        
+                        if let link = components.queryItems?.first(where: { $0.name == "link" })?.value,
+                           let linkComponents = URLComponents(string: link),
+                           let groupID = linkComponents.queryItems?.first(where: { $0.name == "groupID" })?.value {
+                            print("groupid: \(groupID)")
+                            if groupID != ""{
+                                if authViewModel.authState == .logged {
+                                    // check if already in team
+                                    profileViewModel.fetchMember { result in
+                                        switch result{
+                                        case .success(let member):
+                                            if member.groupId == "" {
+                                                profileViewModel.fetchTeam(id: groupID) { result in
+                                                    switch result{
+                                                        
+                                                    case .success(let team):
+                                                        
+                                                        if team.teamMemberIDS.count == 6 {
+                                                            return
+                                                        }
+                                                        self.teamName = team.teamName
+                                                        self.teamId = groupID
+                                                        self.shouldShowInviteAlert = true
+                                                        
+                                                        //show invite label alert
+                                                       
+                                                        
+                                                    case .failure(let error):
+                                                        print("error feching team \(error)")
+                                                        return
+                                                    }
+                                                }
+                                            }
+                                        case .failure(let error):
+                                            print("error fetching member to check foro team \(error)")
+                                            return
+                                        }
+                                    }
+                                    
+                                    //check if team is full before joining
+                                }
+                            }
+       
+                            
+                        } else {
+                            print("group id not found")
+                        }
+                    }
+                }
+      
+                .sheet(isPresented: $shouldShowInviteAlert, content: {
+                    InviteAlertView(teamName:$teamName, groupId:$teamId, isPresented: $shouldShowInviteAlert)
+                        .environmentObject(profileViewModel)
+                        .environmentObject(appState)
+
+                        .presentationDetents([.medium])
+
+
+                })
+            
+
+
+
+
 
         }
-    }
+    }  
 }
-
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
     let gcmMessageIDKey = "gcm.message_id"
 
+    func application(_ application: UIApplication, open urls: URL) {
+        print("this is handling urls ")
+            print("Unhandled: \(urls)")    // << here !!
+        }
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
       FirebaseApp.configure()
         FirebaseConfiguration.shared.setLoggerLevel(.min)
@@ -83,6 +165,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func handleIncomingDynamicLink(_ dynamicLink:DynamicLink){
+        print("Handle incoming dynamic link")
         guard let url = dynamicLink.url else {
             print("no object in url")
             return
@@ -98,29 +181,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        dynamicLink.matchType
     }
 
-    private func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void ) -> Bool {
+     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void ) -> Bool {
         print("opening url ")
         if let incomingURL = userActivity.webpageURL{
             print("Incoming url is \(incomingURL)")
             
-            let linkHandled = DynamicLinks.dynamicLinks().handleUniversalLink(incomingURL){
-                (dynamicLink, error) in
+            let linkHandled = DynamicLinks.dynamicLinks().handleUniversalLink(incomingURL) { (dynamicLink, error) in
                 guard error == nil else {
                     print("found an error \(error!.localizedDescription)")
                     return
                 }
-                if let dynamicLink = dynamicLink{
+                if let dynamicLink = dynamicLink {
                     self.handleIncomingDynamicLink(dynamicLink)
                 }
             }
             if linkHandled{
+                print("link handled")
                 return true
-            }else{
+            } else {
+                print("link not handled")
                 return false
             }
         }
         return false
     }
+
+
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("I have received a url from custom scheme \(url.absoluteString)")
 
@@ -363,9 +449,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                             eventViewModel.fetchSingleCompletedEvent(id: documentId) { result in
                                 switch result{
                                 case .success(let event):
-                                    var fetchedEvent = event
+                                    let fetchedEvent = event
                                     
-                                    let imagePostView = ImagePost(completedEvent: fetchedEvent,isOverlayShowing: true)
+                                    let imagePostView = ImagePost(completedEvent: fetchedEvent,isOverlayShowing: true,fromProfile:false)
                                         .environmentObject(eventViewModel)
                                         .environmentObject(profileViewModel) // inject profilesViewModel as an environment object
 
@@ -527,3 +613,12 @@ extension AppDelegate: MessagingDelegate {
 }
 
 
+extension URL {
+    func valueOf(_ param: String) -> String? {
+        guard let urlComponents = URLComponents(url: self, resolvingAgainstBaseURL: true) else {
+            return nil
+        }
+        
+        return urlComponents.queryItems?.first(where: { $0.name == param })?.value
+    }
+}

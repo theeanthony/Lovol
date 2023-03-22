@@ -79,7 +79,7 @@ struct SuggestedFrame: View {
                                                     removeEvent(events: newValue)
                                                 })
                                         .fullScreenCover(isPresented: $isPresented) {
-                                           NewEventInformationView(event:$popUpEvent)
+//                                           NewEventInformationView(event:$popUpEvent)
                                         }
 
                                     }

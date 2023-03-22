@@ -12,6 +12,7 @@ struct PastEventLabel: View {
     let hostEvent : HostEvent
     
     let groupId : String
+    let hostName:String
     
     @State private var addEvent : Bool = false
     
@@ -43,7 +44,7 @@ struct PastEventLabel: View {
         .padding()
         .background(RoundedRectangle(cornerRadius: 10).fill(AppColor.lovolPinkish))
         .fullScreenCover(isPresented: $addEvent, content: {
-            AddEventView(groupId: groupId, hostEvent:hostEvent)
+            AddEventView(groupId: groupId, hostName: hostName, hostEvent:hostEvent)
         })
     }
     private func add(){

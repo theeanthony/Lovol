@@ -14,6 +14,7 @@ struct ProfileFrameView: View {
     @State private var level : Int = 0
     @State private var progress : Float = 0.0
     @State private var nextLevel : Int = 1
+    @Binding var teamPicLoaded : Bool
 
     var body: some View {
         GeometryReader { geo in
@@ -26,20 +27,28 @@ struct ProfileFrameView: View {
 //                    Text("\(level)")
                     Text("\(teamInfo.lifetimeLovolBits)/\(nextLevel)")
                         .font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
-//                        .padding(5)
+                        .padding(.bottom,5)
 
                     ZStack{
-                        Image(uiImage: image)
-                            .resizable()
-                            .centerCropped()
-                        //                        .frame(width:geo.size.width * 0.29, height: geo.size.width * 0.29)
-                            .frame(width:geo.size.width * 0.35, height: geo.size.width * 0.35)
                         
-                            .aspectRatio(contentMode: .fill)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle().stroke(.white, lineWidth: 5)
-                            )
+                        if teamPicLoaded {
+                            Image(uiImage: image)
+                                .resizable()
+                                .centerCropped()
+                            //                        .frame(width:geo.size.width * 0.29, height: geo.size.width * 0.29)
+                                .frame(width:geo.size.width * 0.35, height: geo.size.width * 0.35)
+                            
+                                .aspectRatio(contentMode: .fill)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle().stroke(.white, lineWidth: 5)
+                                )
+                        }else{
+                            Circle().stroke(.white, lineWidth: 5)
+                                .frame(width:geo.size.width * 0.35, height: geo.size.width * 0.35)
+
+                        }
+             
                         CircleLevelView(progress: progress)
                             .frame(width:geo.size.width * 0.45, height: geo.size.width * 0.45)
 

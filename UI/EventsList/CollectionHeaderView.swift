@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct CollectionHeaderView: View {
+    let inGroupError : Bool
+    let headers : [String] = ["Home", "Local", "Adult"]
     
-    let headers : [String] = ["Home", "Local", "Virtual", "21+", "Couples", "After Dark"]
-    
-    let headerPics : [String] = ["HouseFrame", "localPic", "virtualReality", "adultFrame1", "CouplesFrame1", "AfterDarkFrame"]
+    let headerPics : [String] = ["HouseFrame", "localPic", "adultFrame1"]
     
 //    let events : [EventModel]
     
@@ -23,20 +23,24 @@ struct CollectionHeaderView: View {
     
     let locationSet : Bool
     let long : Double
-    let lat : Double 
+    let lat : Double
     
+    @State private var chosenSetOfEvents : [EventModel] = []
+    @State private var headerName : String = ""
     
+//    eventDictionary[headers[header]]
     var body: some View {
         
         GeometryReader{geo in
             
-            ScrollView(.horizontal){
+//            ScrollView(.horizontal){
                 HStack{
+                    Spacer()
                     ForEach(headers.indices, id:\.self){ header in
                         Button {
                             
                         } label: {
-                            NavigationLink(destination:IndividualLabelEventView(eventDictionary: eventDictionary[headers[header]] ?? [:], heder: headers[header], locationSet:locationSet,long:long,lat:lat) ) {
+                            NavigationLink(destination:IndividualLabelEventView(inGroupError:inGroupError,events: $chosenSetOfEvents , heder:headerName,locationSet:locationSet,long:long,lat:lat) ) {
                                 //
                                 VStack{
                                     Image(headerPics[header])
@@ -53,8 +57,23 @@ struct CollectionHeaderView: View {
                                 }
                             }
                             
+                            Spacer()
+                            
                             
                         }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            // Handle tap gesture here
+                            self.headerName = headers[header]
+                            chosenSetOfEvents.removeAll()
+                            let chosenDictionary = eventDictionary[headers[header]]
+                            
+                            for (_, value) in chosenDictionary! {
+                                self.chosenSetOfEvents.append(value)
+                            }
+                            
+                       
+//                           = chosenDictionary![headers[header]]
+                        })
                         .padding(.horizontal,10)
                         
                         
@@ -64,9 +83,9 @@ struct CollectionHeaderView: View {
 
                 }
                 .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
-            }
+//            }
             .padding(.vertical)
-            .scrollIndicators(.hidden)
+//            .scrollIndicators(.hidden)
 //            .onAppear(perform:onAppear)
             
             

@@ -15,6 +15,7 @@ import CoreData
 import simd
 import FirebaseStorage
 import CoreLocation
+import AVFoundation
 
 class EventViewModel: NSObject, ObservableObject{
     private let IMG_MAX_SIZE: Int64 = 10 * 1024 * 1024
@@ -123,7 +124,7 @@ class EventViewModel: NSObject, ObservableObject{
             if document.exists {
                 
                 let address = document.get("address") as! String
-                let eventId = document.get("eventId") as! String
+                let eventId = document.get("id") as! String
                 let eventDescription = document.get("eventDescription") as! String
 //                let eventLocation = document.get("eventLocation") as! String
       
@@ -207,9 +208,87 @@ class EventViewModel: NSObject, ObservableObject{
                         let eventTime = document.get("eventTime") as! Int
                         let eventCost = document.get("eventCost") as! Int
                         let eventPoints = document.get("eventPoints") as! Int
-                        let eventModel : EventModel = EventModel(id: event.eventId, eventName: event.eventName, eventDescription: event.eventDescription, eventRules: event.eventRules, eventAverageCost: eventCost, eventTime: eventTime, eventPoints: eventPoints, eventType: "Local", eventMonth: event.eventMonth, eventURL: event.photoURL, eventOfferings: event.eventOfferings, eventTips: event.eventTips, eventTags: event.eventTags, isTemp: true, eventReviewPercentage: 0, eventTotalReviews: 0, eventLocation: true, long: event.eventLongCoord, lat: event.eventLatCoord, distance: distance, totalRSVP: totalRSVP, startingTime: event.eventStartTime, endingTime: event.eventEndTime, note: "", groupIDS: groupIDS, didIRSVP: false, lastReview: "", lastReviewName: "", lastReviewDate: "", lastReviewScore: 0, address: event.eventCityName)
+                        let hostName = event.hostName
+                        let hostId = event.hostId
+                        let eventModel : EventModel = EventModel(id: event.eventId, eventName: event.eventName, eventDescription: event.eventDescription, eventRules: event.eventRules, eventAverageCost: eventCost, eventTime: eventTime, eventPoints: eventPoints, eventType: "Local", eventMonth: event.eventMonth, eventURL: event.photoURL, eventOfferings: event.eventOfferings, eventTips: event.eventTips, eventTags: event.eventTags, isTemp: true, eventReviewPercentage: 0, eventTotalReviews: 0, eventLocation: true, long: event.eventLongCoord, lat: event.eventLatCoord, distance: distance, totalRSVP: totalRSVP, startingTime: event.eventStartTime, endingTime: event.eventEndTime, note: "", groupIDS: groupIDS, didIRSVP: false, lastReview: hostId, lastReviewName: hostName, lastReviewDate: "", lastReviewScore: 0, address: event.eventCityName)
                         events.append(eventModel)
                     }
+                    
+                    
+                    count += 1
+                    
+                    if maxCount == count {
+                        onCompletion(.success(events))
+                        return
+                    }
+                    
+            
+
+                }
+                catch{
+                    print("error parsing this hosted event")
+                    count += 1
+                    if maxCount == count {
+                        onCompletion(.success(events))
+                        return
+                    }
+            
+                }
+                
+                
+                
+            }
+        }
+        
+    }
+    func fetchHostedEventsForProfile(id:String,locationSet:Bool,long:Double,lat:Double,onCompletion:@escaping(Result<[EventModel],DomainError>)->()){
+        
+        let hostRef = db.collection("hosted_events_v1").whereField("hostId", isEqualTo: id)
+
+        hostRef.getDocuments { query, error in
+            guard let documents = query , error == nil else {
+                onCompletion(.failure(.downloadError))
+                return
+            }
+            var count = 0
+            let maxCount = documents.documents.count
+            
+            if maxCount == 0 {
+                onCompletion(.success([]))
+                return
+            }
+            
+            var events : [EventModel] = []
+            let decoder = JSONDecoder()
+
+            for document in documents.documents {
+                var dict = document.data()
+                for (key, value) in dict {
+                    if let value = value as? Date {
+                        let formatter = DateFormatter()
+                        dict[key] = formatter.string(from:value)
+                    }
+                }
+                let data = try? JSONSerialization.data(withJSONObject: dict, options:[])
+                do{
+                    let event = try decoder.decode(HostEvent.self, from: data!)
+                    
+//                    if event.eventEndTime < Date() {
+//                        self.updateEventStatus(id:event.eventId)
+//                    }
+//                    else{
+                        
+                        let distance = self.distance(lat1: event.eventLatCoord, lon1: event.eventLongCoord, lat2: lat, lon2: long)
+                        let groupIDS = document.get("groupIDS") as! [String]
+                        let totalRSVP : Int = groupIDS.count
+                        let eventTime = document.get("eventTime") as! Int
+                        let eventCost = document.get("eventCost") as! Int
+                        let eventPoints = document.get("eventPoints") as! Int
+                        let hostName = event.hostName
+                        let hostId = event.hostId
+                        let eventModel : EventModel = EventModel(id: event.eventId, eventName: event.eventName, eventDescription: event.eventDescription, eventRules: event.eventRules, eventAverageCost: eventCost, eventTime: eventTime, eventPoints: eventPoints, eventType: "Local", eventMonth: event.eventMonth, eventURL: event.photoURL, eventOfferings: event.eventOfferings, eventTips: event.eventTips, eventTags: event.eventTags, isTemp: true, eventReviewPercentage: 0, eventTotalReviews: 0, eventLocation: true, long: event.eventLongCoord, lat: event.eventLatCoord, distance: distance, totalRSVP: totalRSVP, startingTime: event.eventStartTime, endingTime: event.eventEndTime, note: "", groupIDS: groupIDS, didIRSVP: false, lastReview: hostId, lastReviewName: hostName, lastReviewDate: "", lastReviewScore: 0, address: event.eventCityName)
+                        events.append(eventModel)
+//                    }
                     
                     
                     count += 1
@@ -278,7 +357,7 @@ class EventViewModel: NSObject, ObservableObject{
             for document in documentSnapshot.documents{
                 
             
-                let eventId = document.get("eventId") as! String
+                let eventId = document.get("id") as! String
                 let eventDescription = document.get("eventDescription") as! String
 //                let eventLocation = document.get("eventLocation") as! String
       
@@ -315,7 +394,7 @@ class EventViewModel: NSObject, ObservableObject{
 
 //
                 if !locationSet && !eventIsTemp{
-                    print("Event does not have location sent or event is temp")
+//                    print("Event does not have location sent or event is temp")
                     let event : EventModel = EventModel(id: eventId, eventName: eventName, eventDescription: eventDescription, eventRules: eventRules,  eventAverageCost: eventAverageCost, eventTime: eventTime, eventPoints: eventPoints, eventType: eventType, eventMonth: eventMonth, eventURL: eventURL, eventOfferings: eventOfferings, eventTips: eventTips, eventTags: eventTags, isTemp: eventIsTemp, eventReviewPercentage: eventReviewPercentage, eventTotalReviews: eventTotalReviews,eventLocation: eventLocation,long:eventLong,lat:eventLat, lastReview: lastReview,lastReviewName: lastReviewName,lastReviewDate: lastReviewDate, lastReviewScore: lastReviewScore, address: "")
                     
               
@@ -392,7 +471,7 @@ class EventViewModel: NSObject, ObservableObject{
                 
                 
                 
-                let eventId = document.get("eventId") as! String
+                let eventId = document.get("id") as! String
                 let eventDescription = document.get("eventDescription") as! String
 //                let eventLocation = document.get("eventLocation") as! String
                 let address = document.get("address") as! String
@@ -527,7 +606,7 @@ class EventViewModel: NSObject, ObservableObject{
         
         
     }
-    func submitEvent(useMultiplier:Bool, isGlobal: Bool, event: EventModel, photo: [UIImage], onCompletion: @escaping (Result<Int,DomainError>)->()){
+    func submitEvent(caption:String,useMultiplier:Bool, isGlobal: Bool, event: EventModel, photo: [UIImage], videos:URL?, progress: @escaping (Float) -> Void, onCompletion: @escaping (Result<Int,DomainError>)->()){
         
          profileViewModel.fetchMember { result in
              switch result {
@@ -562,6 +641,7 @@ class EventViewModel: NSObject, ObservableObject{
                                   "eventName" : event.eventName,
                                   "eventPoints" : event.eventPoints,
                                   "eventType" : event.eventType,
+                                  "caption":caption,
                                   "eventCompleted" : true,
                                   "timestamp" : FieldValue.serverTimestamp(),
                                   "photoURL" : "",
@@ -620,7 +700,7 @@ class EventViewModel: NSObject, ObservableObject{
                              }
                              print("POINTS in submitevent \(newPoints)")
 
-                             self.submitPhoto(points:newPoints,groupId:groupId,isGlobal:isGlobal,event: event, photo: photo, onCompletion: onCompletion)
+                             self.submitPhoto(caption:caption,points:newPoints,groupId:groupId,isGlobal:isGlobal,event: event, photo: photo,videos:videos, progress: progress, onCompletion: onCompletion)
                          }
                      }
                  }
@@ -680,8 +760,76 @@ class EventViewModel: NSObject, ObservableObject{
 
         
     }
-    private func submitPhoto(points:Int,groupId:String,isGlobal:Bool,event: EventModel, photo: [UIImage], onCompletion: @escaping (Result<Int,DomainError>)->()){
-        //
+//    private func submitPhoto(caption:String,points:Int,groupId:String,isGlobal:Bool,event: EventModel, photo: [UIImage], videos:[URL],onCompletion: @escaping (Result<Int,DomainError>)->()){
+//        //
+//        var count = 0
+//        print("POINTS \(points)")
+//        let eventRef = self.storage.child("events_v1").child("\(groupId)")
+//
+//        var eventURLS : [String] = []
+//        let max = photo.count + videos.count
+//
+//        for (index,photo) in photo.enumerated() {
+//            let data = photo.jpegData(compressionQuality: 0.5)!
+//            let picRef = eventRef.child("event_pic_\(event.eventMonth)\(event.id)_\(index).jpg")
+//            picRef.putData(data, metadata: nil) { (metadata, error) in
+//                guard metadata != nil else {
+//                    onCompletion(.failure(.downloadError))
+//                    return
+//                }
+//                picRef.downloadURL { (url, error) in
+//                    guard let downloadURL = url else {
+//                        print("an error occured after uploading and then getting the URL")
+//                        onCompletion(.failure(.downloadError))
+//                        return
+//                    }
+//
+//                    eventURLS.append(downloadURL.absoluteString)
+//                    count += 1
+//                    if count == max {
+//                        print("EVENT URLS \(eventURLS)")
+//
+//                        self.db.collection("group_v2").document(groupId).collection("group_events_v1").document("\(event.eventMonth)\(event.id)").updateData([
+//                            "photoURL" : eventURLS
+//                        ])
+//                        let randomId = UUID().uuidString
+//                        self.db.collection("group_v2").document(groupId).getDocument { doc, error in
+//                            guard let doc = doc , error == nil else {
+//                                onCompletion(.failure(.downloadError))
+//                                return
+//                            }
+//                            let groupName = doc.get("teamName") as! String
+//                            self.db.collection("completed_events").document(randomId).setData([
+//                                "photoURLS" : eventURLS,
+//                                "groupId" : groupId,
+//                                "eventName" : event.eventName,
+//                                "eventType" : event.eventType,
+//                                "eventMonth" : event.eventMonth,
+//                                "teamName" : groupName,
+//                                "caption":caption,
+//                                "timeStamp" : Timestamp(),
+//                                "likes": 0,
+//                                "commentNum" : 0,
+//                                "id": event.id,
+//                                "isGlobal" : isGlobal
+//
+//
+//                            ])
+//                            print("points about to submit \(points)")
+//                            onCompletion(.success(points))
+//                            return
+//                        }
+//                    }
+//                }
+//
+//            }
+//        }
+//
+//
+//
+//    }
+
+    private func submitPhoto(caption:String,points:Int,groupId:String,isGlobal:Bool,event: EventModel, photo: [UIImage], videos:URL?, progress: @escaping (Float) -> Void,onCompletion: @escaping (Result<Int,DomainError>)->()){
         var count = 0
         print("POINTS \(points)")
         let eventRef = self.storage.child("events_v1").child("\(groupId)")
@@ -689,6 +837,29 @@ class EventViewModel: NSObject, ObservableObject{
         var eventURLS : [String] = []
         let max = photo.count
         
+        var videoCount = 0
+        if let videos = videos {
+            videoCount += 1
+            print("theres a video")
+        }
+        let totalItemCount = photo.count + videoCount
+        
+        if photo.isEmpty{
+            if videoCount == 0 {
+                self.saveToFirestore(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, eventURLS:eventURLS, onCompletion: onCompletion)
+
+            }else{
+                if let videos = videos{
+                    self.uploadVideos(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, photoURLS: eventURLS,videos:videos,progress:progress, onCompletion: onCompletion)
+                }else{
+                    self.saveToFirestore(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, eventURLS:eventURLS, onCompletion: onCompletion)
+
+                }
+        
+            }
+        }
+
+        // Upload photos to Firebase Storage
         for (index,photo) in photo.enumerated() {
             let data = photo.jpegData(compressionQuality: 0.5)!
             let picRef = eventRef.child("event_pic_\(event.eventMonth)\(event.id)_\(index).jpg")
@@ -703,61 +874,107 @@ class EventViewModel: NSObject, ObservableObject{
                         onCompletion(.failure(.downloadError))
                         return
                     }
-
+                    
                     eventURLS.append(downloadURL.absoluteString)
                     count += 1
+                    let currentProgress = Float(count) / Float(totalItemCount)
+                    progress(currentProgress)
                     if count == max {
-                        print("EVENT URLS \(eventURLS)")
+                        // All photos are uploaded, continue to videos
+                        if videoCount == 0 {
+                            self.saveToFirestore(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, eventURLS:eventURLS, onCompletion: onCompletion)
 
-                        self.db.collection("group_v2").document(groupId).collection("group_events_v1").document("\(event.eventMonth)\(event.id)").updateData([
-                            "photoURL" : eventURLS
-                        ])
-                        let randomId = UUID().uuidString
-                        self.db.collection("group_v2").document(groupId).getDocument { doc, error in
-                            guard let doc = doc , error == nil else {
-                                onCompletion(.failure(.downloadError))
-                                return
+                        }else{
+                            if let videos = videos{
+                                self.uploadVideos(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, photoURLS: eventURLS,videos:videos,progress:progress, onCompletion: onCompletion)
+                            }else{
+                                self.saveToFirestore(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, eventURLS:eventURLS, onCompletion: onCompletion)
+
                             }
-                            let groupName = doc.get("teamName") as! String
-                            self.db.collection("completed_events").document(randomId).setData([
-                                "photoURLS" : eventURLS,
-                                "groupId" : groupId,
-                                "eventName" : event.eventName,
-                                "eventType" : event.eventType,
-                                "eventMonth" : event.eventMonth,
-                                "teamName" : groupName,
-                                "timeStamp" : Timestamp(),
-                                "likes": 0,
-                                "commentNum" : 0,
-                                "id": event.id,
-                                "isGlobal" : isGlobal
-                                
-                                
-                            ])
-                            print("points about to submit \(points)")
-                            onCompletion(.success(points))
-                            return
+                    
                         }
+                   
                     }
                 }
-
+                
             }
         }
-        
-     
-       
     }
 
 
+
+    func uploadVideos(caption: String, points: Int, groupId: String, isGlobal: Bool, event: EventModel, photoURLS: [String], videos: URL, progress: @escaping (Float) -> Void, onCompletion: @escaping (Result<Int, DomainError>) -> ()) {
+        var count = 0
+        var eventURLS = photoURLS
+        let totalItemCount = 1 // set to 1 since we are uploading one video
+        let eventRef = self.storage.child("events_v1").child("\(groupId)")
+        let videoName = "event_video_\(event.eventMonth)\(event.id)_\(0).mp4" // index is 0 since we are uploading one video
+        let videoRef = eventRef.child(videoName)
+        let uploadTask = videoRef.putFile(from: videos, metadata: nil) { metadata, error in
+            guard let metadata = metadata else {
+                onCompletion(.failure(.downloadError))
+                return
+            }
+
+            videoRef.downloadURL { url, error in
+                guard let downloadURL = url else {
+                    onCompletion(.failure(.downloadError))
+                    return
+                }
+
+                eventURLS.append(downloadURL.absoluteString)
+                count += 1
+                let currentProgress = Float(count) / Float(totalItemCount)
+                progress(currentProgress)
+                if count == totalItemCount {
+                    // All photos and videos are uploaded, continue to Firestore
+                    self.saveToFirestore(caption:caption,points:points,groupId:groupId,isGlobal:isGlobal,event: event, eventURLS:eventURLS, onCompletion: onCompletion)
+                }
+            }
+        }
+    }
+
+    func saveToFirestore(caption:String,points:Int,groupId:String,isGlobal:Bool,event: EventModel, eventURLS: [String],onCompletion: @escaping (Result<Int,DomainError>)->()){
+        self.db.collection("group_v2").document(groupId).collection("group_events_v1").document("\(event.eventMonth)\(event.id)").updateData([
+                                   "photoURL" : eventURLS
+                               ])
+                               let randomId = UUID().uuidString
+                               self.db.collection("group_v2").document(groupId).getDocument { doc, error in
+                                   guard let doc = doc , error == nil else {
+                                       onCompletion(.failure(.downloadError))
+                                       return
+                                   }
+                                   let groupName = doc.get("teamName") as! String
+                                   self.db.collection("completed_events").document(randomId).setData([
+                                       "photoURLS" : eventURLS,
+                                       "groupId" : groupId,
+                                       "eventName" : event.eventName,
+                                       "eventType" : event.eventType,
+                                       "eventMonth" : event.eventMonth,
+                                       "teamName" : groupName,
+                                       "caption":caption,
+                                       "timeStamp" : Timestamp(),
+                                       "likes": 0,
+                                       "commentNum" : 0,
+                                       "id": event.id,
+                                       "isGlobal" : isGlobal
+       
+       
+                                   ])
+                                   print("points about to submit \(points)")
+                                   onCompletion(.success(points))
+                                   return
+                               }
+    }
                     
              
                     
                      
 
     
-    private func submitPhotoURLToDB(url: String, onCompletion:@escaping(Result<Bool,DomainError>)->()){
-        
-    }
+//    private func submitPhotoURLToDB(url: String, onCompletion:@escaping(Result<Bool,DomainError>)->()){
+//
+//    }
     func fetchComments(id:String, onCompletion:@escaping (Result<[CommentModel],DomainError>)->()){
         
         db.collection("completed_events").document(id).collection("comments").order(by:"timeStamp", descending: false).getDocuments { query, error in
@@ -917,6 +1134,10 @@ class EventViewModel: NSObject, ObservableObject{
         
 //         self.isFetchingMoreDocs = true
         print("ALLIANCS \(alliances)")
+        if alliances.isEmpty {
+            onCompletion(.success([]))
+            return
+        }
         var limit = 2
         var docQuery: Query!
         if events.isEmpty && !skip{
@@ -983,6 +1204,7 @@ class EventViewModel: NSObject, ObservableObject{
                 let likes = document.get("likes") as! Int
                 let commentsNum = document.get("commentNum") as! Int
                 let timeStamp = document.get("timeStamp") as! Timestamp
+                let caption = document.get("caption") as! String
                 
                 let formatter = DateFormatter()
                 let newValue = timeStamp.dateValue()
@@ -994,7 +1216,7 @@ class EventViewModel: NSObject, ObservableObject{
                 self.db.collection("completed_events").document(document.documentID).collection("likes").document(self.profileViewModel.fetchUserId()).getDocument { doc, error in
                        if let doc = doc, doc.exists {
                            
-                           let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes, comments: commentsNum,  didILike: true, timeStamp: time)
+                           let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes, comments: commentsNum,  didILike: true, timeStamp: time, caption: caption)
                            fetchedEvents.append(event)
                            count += 1
                            self.lastDocQuery = documentSnapshot.documents.last
@@ -1007,7 +1229,7 @@ class EventViewModel: NSObject, ObservableObject{
                         }
                         else{
                             
-                            let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes,  comments: commentsNum, didILike: false, timeStamp: time  )
+                            let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes,  comments: commentsNum, didILike: false, timeStamp: time, caption: caption  )
                             fetchedEvents.append(event)
                             count += 1
                             self.lastDocQuery = documentSnapshot.documents.last
@@ -1102,7 +1324,8 @@ class EventViewModel: NSObject, ObservableObject{
                 let likes = document.get("likes") as! Int
                 let commentsNum = document.get("commentNum") as! Int
                 let timeStamp = document.get("timeStamp") as! Timestamp
-                
+                let caption = document.get("caption") as! String
+
                 let formatter = DateFormatter()
                 let newValue = timeStamp.dateValue()
                 formatter.dateStyle = .short
@@ -1113,7 +1336,7 @@ class EventViewModel: NSObject, ObservableObject{
                 self.db.collection("completed_events").document(document.documentID).collection("likes").document(self.profileViewModel.fetchUserId()).getDocument { doc, error in
                        if let doc = doc, doc.exists {
                            
-                           let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes, comments: commentsNum,  didILike: true, timeStamp: time)
+                           let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes, comments: commentsNum,  didILike: true, timeStamp: time, caption: caption)
                            fetchedEvents.append(event)
 //                           print("Counting")
                            count += 1
@@ -1127,7 +1350,7 @@ class EventViewModel: NSObject, ObservableObject{
                         }
                         else{
                             
-                            let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes,  comments: commentsNum, didILike: false, timeStamp: time  )
+                            let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId , eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: document.documentID, likes: likes,  comments: commentsNum, didILike: false, timeStamp: time, caption: caption  )
                             fetchedEvents.append(event)
 //                            print("Counting")
 
@@ -1514,9 +1737,184 @@ class EventViewModel: NSObject, ObservableObject{
 
               }
         
- 
+    func fetchSavedHostedEvents(teamId:String,saves:[String],lat:Double,long:Double,onCompletion:@escaping(Result<[EventModel],DomainError>)->()){
         
-    
+        let eventRef = db.collection("hosted_events_v1")
+        
+        if saves.isEmpty {
+            onCompletion(.success([]))
+            return
+        }
+        var count = 0
+        let maxCount = saves.count
+        var events : [EventModel] = []
+        let decoder = JSONDecoder()
+        for save in saves {
+            eventRef.document(save).getDocument { document , error in
+                guard let document = document , error == nil else {
+                    onCompletion(.failure(.downloadError))
+                    return
+                }
+                var dict = document.data()!
+                for (key, value): (String, Any) in dict {
+                    if let value = value as? Date {
+                        let formatter = DateFormatter()
+                        dict[key] = formatter.string(from:value)
+                    }
+                }
+
+                let data = try? JSONSerialization.data(withJSONObject: dict, options:[])
+                do{
+                    let event = try decoder.decode(HostEvent.self, from: data!)
+
+                    if event.eventEndTime < Date() {
+                        self.updateEventStatus(id:event.eventId)
+                    }
+                    else{
+
+                        let distance = self.distance(lat1: event.eventLatCoord, lon1: event.eventLongCoord, lat2: lat, lon2: long)
+                        let groupIDS = document.get("groupIDS") as! [String]
+                        let totalRSVP : Int = groupIDS.count
+                        let eventTime = document.get("eventTime") as! Int
+                        let eventCost = document.get("eventCost") as! Int
+                        let eventPoints = document.get("eventPoints") as! Int
+                        let hostName = event.hostName
+                        let hostId = event.hostId
+                        var eventModel : EventModel = EventModel(id: event.eventId, eventName: event.eventName, eventDescription: event.eventDescription, eventRules: event.eventRules, eventAverageCost: eventCost, eventTime: eventTime, eventPoints: eventPoints, eventType: "Local", eventMonth: event.eventMonth, eventURL: event.photoURL, eventOfferings: event.eventOfferings, eventTips: event.eventTips, eventTags: event.eventTags, isTemp: true, eventReviewPercentage: 0, eventTotalReviews: 0, eventLocation: true, long: event.eventLongCoord, lat: event.eventLatCoord, distance: distance, totalRSVP: totalRSVP, startingTime: event.eventStartTime, endingTime: event.eventEndTime, note: "", groupIDS: groupIDS, didIRSVP: false, lastReview: hostId, lastReviewName: hostName, lastReviewDate: "", lastReviewScore: 0, address: event.eventCityName)
+                         eventModel.didISave = true 
+                        events.append(eventModel)
+                    }
+
+
+                    count += 1
+
+                    if maxCount == count {
+                        onCompletion(.success(events))
+                        return
+                    }
+
+
+
+                }
+                catch{
+                    print("error parsing this hosted event")
+                    count += 1
+                    if maxCount == count {
+                        onCompletion(.success(events))
+                        return
+                    }
+
+                }
+                
+            }
+        }
+        
+    }
+        
+    func fetchTeamSavedEvents(teamId:String,saves:[String], lat:Double,long:Double, onCompletion:@escaping(Result<[EventModel],DomainError>)->()){
+        
+        
+        let eventRef = db.collection("events_v1")
+        let hostRef = db.collection("hosted_events_v1")
+        
+        var events : [EventModel] = []
+        var count = 0
+        
+        let hostSaves = saves.filter{
+            $0.count > 4
+        }
+        
+            self.fetchSavedHostedEvents(teamId: teamId, saves: hostSaves, lat: lat, long: long) { result in
+                switch result{
+                case .success(let hostedEvents):
+                    events = hostedEvents
+                    
+                    let freeSaves = saves.filter {
+                        $0.count < 4
+                    }
+                    let maxCount = freeSaves.count
+                    
+                    if freeSaves.isEmpty {
+                        onCompletion(.success(events))
+                        return
+                    }
+                    for save in freeSaves {
+                        
+                        eventRef.document(save).getDocument { document, error in
+                            guard let document = document, error == nil else {
+                                count += 1
+                                if count == maxCount {
+                                    onCompletion(.success(events))
+                                }
+                                return
+                            }
+                            
+                            let isTempEvent = document.get("isTempEvent") as! Bool
+                            let eventLong = document.get("long") as! Double
+                            let eventLat = document.get("lat") as! Double
+                            
+                           
+                            let eventId = document.get("id") as! String
+                            let eventDescription = document.get("eventDescription") as! String
+                            //                let eventLocation = document.get("eventLocation") as! String
+                            let address = document.get("address") as! String
+                            
+                            let eventName = document.get("eventName") as! String
+                            let eventPoints = document.get("eventPoints") as! Int
+                            let eventType = document.get("eventType") as! String
+                            let eventAverageCost = document.get("eventAverageCost") as! Int
+                            let eventTime = document.get("eventTime") as! Int
+                            let eventRules = document.get("eventRules") as! String
+                            let eventMonth = document.get("eventMonth") as! String
+                            let eventURL = document.get("eventURL") as! String
+                            let eventOfferings = document.get("eventOfferings") as! String
+                            let eventTips = document.get("eventTips") as! String
+                            let eventTags = document.get("eventTags") as! [String]
+                            let eventReviewPercentage = document.get("eventReviewPercentage") as! Double
+                            let eventTotalReviews = document.get("eventTotalReviews") as! Int
+                            let eventLocation = document.get("eventLocation") as! Bool
+                            let lastReview = document.get("lastReview") as! String
+                            let lastReviewName = document.get("lastReviewName") as! String
+                            let lastReviewDate = document.get("lastReviewDate") as! String
+                            let lastReviewScore = document.get("lastReviewScore") as! Int
+                            let distance = self.distance(lat1: eventLat, lon1: eventLong, lat2: lat, lon2: long)
+
+                                    
+                                    var event : EventModel = EventModel(id: eventId, eventName: eventName, eventDescription: eventDescription, eventRules: eventRules,  eventAverageCost: eventAverageCost, eventTime: eventTime, eventPoints: eventPoints, eventType: eventType, eventMonth: eventMonth, eventURL: eventURL, eventOfferings: eventOfferings, eventTips: eventTips, eventTags: eventTags, isTemp: isTempEvent, eventReviewPercentage: eventReviewPercentage, eventTotalReviews: eventTotalReviews,eventLocation: eventLocation,long:eventLong,lat:eventLat, distance:distance, lastReview: lastReview,lastReviewName: lastReviewName,lastReviewDate: lastReviewDate, lastReviewScore: lastReviewScore, address: address)
+                            event.didISave = true
+                            
+                                    events.append(event)
+                                    count+=1
+                                    
+                                    if count == maxCount {
+                                        onCompletion(.success(events))
+                                        return
+                                    }
+                                
+                            
+                         
+              
+                            
+                            
+                        }
+                        
+                        
+                    }
+
+                    
+                case .failure(let error):
+                    print("error fetching hosted saved events \(error)")
+                    return
+                    
+                }
+            }
+        
+        
+        
+        
+  
+        
+    }
     func fetchSavedEvents(teamId: String, chosen:String, suggestedEvents:[String],onCompletion: @escaping (Result<[EventModelWithLikes],DomainError>)->()){
         let savedRef = db.collection("events_v1")
      
@@ -1839,13 +2237,15 @@ class EventViewModel: NSObject, ObservableObject{
                 let likes = document.get("likes") as! Int
                 let commentsNum = document.get("commentNum") as! Int
                 let timeStamp = document.get("timeStamp") as! Timestamp
+            let caption = document.get("caption") as! String
+
                 let formatter = DateFormatter()
                 let newValue = timeStamp.dateValue()
                 formatter.dateStyle = .short
                 formatter.timeStyle = .none
                 let time = formatter.string(from: newValue)
 
-                let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId, eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: documentId, likes: likes, comments: commentsNum, didILike: false, timeStamp: time)
+            let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId, eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: documentId, likes: likes, comments: commentsNum, didILike: false, timeStamp: time, caption: caption)
                 onCompletion(.success(event))
                 return
 
@@ -1889,6 +2289,8 @@ class EventViewModel: NSObject, ObservableObject{
                 let likes = document.get("likes") as! Int
                 let commentsNum = document.get("commentNum") as! Int
                 let timeStamp = document.get("timeStamp") as! Timestamp
+                let caption = document.get("caption") as! String
+
                 let formatter = DateFormatter()
                 let newValue = timeStamp.dateValue()
                 formatter.dateStyle = .short
@@ -1899,7 +2301,7 @@ class EventViewModel: NSObject, ObservableObject{
                     
                     //                        do {
                     
-                let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId, eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: documentId, likes: likes, comments: commentsNum, didILike: false, timeStamp: time)
+                let event : FetchedEvent = FetchedEvent(photoURLS: photoURL, groupId: groupId, eventName: eventName, eventType: eventType, eventMonth: eventMonth, teamName: teamName, id: id, documentId: documentId, likes: likes, comments: commentsNum, didILike: false, timeStamp: time, caption: caption)
                     
                     completedEvents.append(event)
                     
@@ -2477,7 +2879,7 @@ class EventViewModel: NSObject, ObservableObject{
     
     func rsvpToEvent(RSVP: Bool, event:EventModel, onCompletion:@escaping(Result<Void,DomainError>)->()){
         
-        if event.id.count > 10 {
+        if event.id.count > 5 {
             
             profileViewModel.fetchTeamWithoutID { result in
                 switch result{
@@ -2488,7 +2890,7 @@ class EventViewModel: NSObject, ObservableObject{
                             return
                     }
                     let eventRef = self.db.collection("hosted_events_v1").document(event.id)
-                    
+                    let groupRef = self.db.collection("group_v2").document(groupId)
                     eventRef.getDocument { document, error in
                         guard let doc = document, error == nil else {
                             onCompletion(.failure(.downloadError))
@@ -2511,10 +2913,15 @@ class EventViewModel: NSObject, ObservableObject{
                                 "groupIDS" : groupIDS
                             
                             ])
+                            var newRSVPS = team.rsvps
+                            newRSVPS.append(event.id)
                             eventRef.collection("RSVP").document(groupId).setData([
                                 "groupId" : groupId,
                                 "teamName" : team.teamName,
                                 "eventName" : event.eventName
+                            ])
+                            groupRef.updateData([
+                                "rsvps" : newRSVPS
                             ])
                         }else{
                             var count = 0
@@ -2535,7 +2942,25 @@ class EventViewModel: NSObject, ObservableObject{
                                 "groupIDS" : groupIDS
                             
                             ])
+                            var index = 0
+                            var newRSVPS = team.rsvps
+                            for rsvp in team.rsvps {
+                                if rsvp == event.id {
+                                    print("YES TRUE HERE IT IS")
+                                    newRSVPS.remove(at: index)
+                                    print("NEWRSVPS \(newRSVPS)")
+                                    groupRef.updateData([
+                                    
+                                        "rsvps" : newRSVPS
+                                    ])
+
+                                    break
+                                }
+                                index += 1
+                            }
+//                            newRSVPS.remove(at: index)
                             eventRef.collection("RSVP").document(groupId).delete()
+                    
                             
                         }
                         onCompletion(.success(()))
@@ -2559,6 +2984,14 @@ class EventViewModel: NSObject, ObservableObject{
      
         }
        
+    }
+    func uploadEvents(events:[EventModel]){
+        
+        for event in events{
+            let dictionaryEvent = event.dictionary
+            db.collection("events_v1").document(event.id).setData(dictionaryEvent)
+
+        }
     }
         
        

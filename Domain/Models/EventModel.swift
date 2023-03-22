@@ -61,6 +61,8 @@ struct EventModel:  Equatable, Identifiable{
     
     var address : String
     
+    var isActive : Bool = false
+    
     
     init(id:String,eventName:String,eventDescription:String,eventRules:String,eventAverageCost:Int,eventTime:Int, eventPoints: Int,eventType : String,eventMonth: String,eventURL : String,eventOfferings :String,eventTips : String,eventTags:[String], isTemp:Bool, eventReviewPercentage: Double, eventTotalReviews: Int, eventLocation:Bool, long:Double,lat:Double, lastReview:String,lastReviewName:String, lastReviewDate:String, lastReviewScore:Int, address:String){
         self.id = id
@@ -255,6 +257,7 @@ extension EventModel: Codable {
             case lastReviewDate
             case lastReviewScore
             case address
+            case isActive
             
 //            case suggested
     

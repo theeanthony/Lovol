@@ -2174,32 +2174,39 @@ class FirestoreViewModel: NSObject, ObservableObject{
     
     func shareTapped(_ sender: String, onComplete: @escaping(URL)->()){
         let groupId = sender
-        
+        print("sender: \(sender)")
+
         
         var components = URLComponents()
         components.scheme = "https"
         
-        components.host = "www.lovolac.com"
-        
-//        components.path = "/invite"
-     
+        components.host = "lovol.page.link"
+
+        components.path = "/invite"
+        print("group id from share tap \(groupId)")
         let groupIDQueryItem = URLQueryItem(name: "groupID", value: groupId)
         components.queryItems = [groupIDQueryItem]
-        
+        print("link with groupID: \(components.url?.absoluteString)")
+
         guard let linkParameter = components.url else {return }
         
         print("I am sharing \(linkParameter.absoluteString)")
         
-        guard let shareLink = DynamicLinkComponents.init(link:linkParameter, domainURIPrefix: "https://lovol.page.link/test1") else{
+        guard let shareLink = DynamicLinkComponents.init(link:linkParameter, domainURIPrefix: "https://lovol.page.link/invite") else{
             print("Could not create FDL COmponents")
             return
         }
+        
+//        let options = DynamicLinkComponentsOptions()
+//         options.lifetime = 3600
+//         shareLink.options = options
+
         
         if let myBundleId = Bundle.main.bundleIdentifier{
             shareLink.iOSParameters = DynamicLinkIOSParameters(bundleID: myBundleId)
 
         }
-        shareLink.iOSParameters?.appStoreID = "1663381201"
+//        shareLink.iOSParameters?.appStoreID = "1663381201"
         shareLink.socialMetaTagParameters = DynamicLinkSocialMetaTagParameters()
         shareLink.socialMetaTagParameters?.title = "Download Lovol"
         shareLink.socialMetaTagParameters?.descriptionText = "Finally, an app to find inspiration on what to do with your friends all while winning points for a chance to qualify for a live gameshow where you and your team can win money"

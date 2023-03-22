@@ -12,14 +12,16 @@ struct EventFee: View {
     
     @State private var charLimit : Int = 200
     var body: some View {
-        TextField("", text: $eventFee, axis:.vertical)
+        TextField("", text: $eventFee, axis:.horizontal)
             .lineLimit(8)
             .padding()
             .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolRedPyramid).opacity(0.6))
             .padding()
 //                                .fixedSize()
             .placeholder(when: eventFee.isEmpty) {
-            Text("").opacity(0.5).font(.custom("Rubik Regular", size: 28)).foregroundColor(.white)
+            Text("Add Event Cost").opacity(0.5).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+                    .padding()
+                    .padding()
         }.onChange(of: eventFee, perform: {newValue in
             if(newValue.count >= charLimit){
                 eventFee = String(newValue.prefix(charLimit))

@@ -20,6 +20,35 @@ struct Member_Alliances_Requests: View {
               }
           }
       }
+    
+    @State private var showAllianceList : Bool = false
+    var allianceView : some View { Button(action: {
+        self.showAllianceList = true
+          }) {
+              HStack {
+                  Image(systemName: "face.smiling.fill") // set image here
+                  .aspectRatio(contentMode: .fit)
+                  .foregroundColor(.white)
+                  Text("Alliances").font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+
+                  
+              }
+          }
+      }
+    var requestViews : some View { Button(action: {
+        self.showRequests = true
+          }) {
+              HStack {
+                  Image(systemName: "person.fill.questionmark") // set image here
+                  .aspectRatio(contentMode: .fit)
+                  .foregroundColor(.white)
+                  Text("Requests").font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+
+                  
+              }
+          }
+      }
+    @State private var showRequests : Bool = false
     @EnvironmentObject private var profileViewModel : ProfilesViewModel
     let groupId: String
     let teamInfo: FirebaseTeam
@@ -38,6 +67,8 @@ struct Member_Alliances_Requests: View {
     @State private var requestSentAlready : Bool = false
     
     @State private var errorSendingRequest : Bool = false
+    
+    @State private var searchChosenGroupId : String = ""
 
     var body: some View {
         VStack{
@@ -62,7 +93,7 @@ struct Member_Alliances_Requests: View {
             .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolRedPyramid).opacity(0.6))
             .padding(.horizontal,10)
             Spacer()
-            InviteFriendsLabelView(groupId: groupId)
+            InviteFriendsLabelView(groupId: groupId, teamName:teamInfo.teamName)
                 .padding(.vertical,20)
             VStack{
                 
@@ -79,14 +110,16 @@ struct Member_Alliances_Requests: View {
                                 Image(uiImage: allianceSearch.teamPic)
                                     .resizable()
                                     .centerCropped()
-                                
+                                 
                                     .frame(width: geo.size.width * 0.15, height: geo.size.width * 0.15)
                                     .aspectRatio(contentMode: .fill)
                                     .clipShape(Circle())
                                 Text(allianceSearch.teamName).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
                                 Spacer()
                                 Button {
-                                    self.showSearch = true 
+                                    self.searchChosenGroupId = allianceSearch.groupId
+                                           self.showSearch = true
+                                    
                                 } label: {
                                     Text("View Profile")
                                         .padding(5)
@@ -94,8 +127,7 @@ struct Member_Alliances_Requests: View {
                                         .font(.custom("Rubik Regular", size: 12)).foregroundColor(AppColor.lovolDarkerPurpleBackground)
                                 }
                                 .fullScreenCover(isPresented: $showSearch) {
-                                    AllianceFullFrameView(alliance: allianceSearch)
-
+                                        OtherTeamProfileView(groupId: $searchChosenGroupId)
                                 }
                                 Spacer()
                                 Button {
@@ -155,6 +187,12 @@ struct Member_Alliances_Requests: View {
         .ignoresSafeArea(.keyboard)
         .frame(maxWidth:.infinity,maxHeight:.infinity)
         .background(BackgroundView())
+        .fullScreenCover(isPresented: $showAllianceList, content: {
+            AlliancesListView(alliances:teamInfo.alliances)
+        })
+        .fullScreenCover(isPresented: $showRequests, content: {
+            RequestListView(groupId:groupId)
+        })
 
         .onChange(of: searchString) { newValue in
             if newValue.count == 10 {
@@ -182,6 +220,10 @@ struct Member_Alliances_Requests: View {
         })
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: btnBack)
+        .navigationBarItems(trailing: allianceView)
+        .navigationBarItems(trailing: requestViews)
+
+
         .navigationBarTitleDisplayMode(.inline)
     }
     func sendRequest(){

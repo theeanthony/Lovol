@@ -38,7 +38,10 @@ struct ContentView: View {
         case .logged:
             MainTabView()
 //                .onAppear {
-//                    loadJson()
+//
+//                    let events = loadJson()
+//                    eventViewModel.uploadEvents(events: events)
+////                    print(loadJson())
 //
 //                }
         case .unlogged:

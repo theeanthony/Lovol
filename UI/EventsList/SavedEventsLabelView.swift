@@ -240,7 +240,7 @@ struct SavedEventsLabel: View {
                                             .padding(.horizontal,2)
                                         }
                                         .fullScreenCover(isPresented: $isPresented) {
-                                            NewEventInformationView(event:$chosenEvent)
+//                                            NewEventInformationView(event:$chosenEvent)
                                         }
                                         
                                         //                                }

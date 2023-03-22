@@ -10,6 +10,7 @@ import SwiftUI
 struct IndividualLabelEventView: View {
     @EnvironmentObject private var eventViewModel : EventViewModel
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    let inGroupError : Bool
     var btnBack : some View { Button(action: {
           self.presentationMode.wrappedValue.dismiss()
           }) {
@@ -21,15 +22,15 @@ struct IndividualLabelEventView: View {
               }
           }
       }
-    @State private var events : [EventModel] = []
-    let eventDictionary : [String:EventModel]
+    @Binding var events : [EventModel]
+     var heder : String 
+//    let eventDictionary : [String:EventModel]
 
 //    @State private var enterEvents : [EventModel] = []
     
     @State private var chosenEvent : EventModel = EventModel()
     @State private var showTeamsGoing : Bool = false
     @State private var chosenSet : [String] = []
-    let heder : String
  
     let alreadyRSVP : Bool = false
     @State private var distance : Double = 0
@@ -37,6 +38,7 @@ struct IndividualLabelEventView: View {
     let long : Double
     let lat : Double
     @State private var isPresented: Bool = false
+    @State private var chosenIndex : Int = 0
     
     var body: some View {
         GeometryReader { geo in
@@ -47,7 +49,7 @@ struct IndividualLabelEventView: View {
                     VStack{
                         ForEach(events.indices, id:\.self) { event in
                             Button {
-                                fillEvent(event: events[event])
+                                fillEvent(event: events[event],index:event)
                             } label: {
                                 
                                 VStack{
@@ -166,7 +168,7 @@ struct IndividualLabelEventView: View {
                                                     .frame(width:geo.size.width * 0.85)
 
                                                     HStack{
-                                                        Text(String(format: "%.1f%", events[event].eventTotalReviews != 0 ? events[event].eventReviewPercentage / Double(events[event].eventTotalReviews) : 0.0))
+                                                        Text(String(format: "%.1f%", events[event].eventTotalReviews != 0 ? events[event].eventReviewPercentage / Double(events[event].eventTotalReviews) : 0.0)).foregroundColor(.white)
                                                         Image(systemName: "star.fill")
                                                             .foregroundColor(.yellow)
                                                         Text("(\(events[event].eventTotalReviews))").opacity(0.7)
@@ -181,14 +183,15 @@ struct IndividualLabelEventView: View {
                                         }
 //                                        Spacer()
                                     }
+                                    .fullScreenCover(isPresented: $isPresented) {
+                                        NewEventInformationView(inGroupError: inGroupError, event:$events[chosenIndex])
+                                    }
                                 }
                                 .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
                                 .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolPinkish))
 //                                .padding(.horizontal,2)
                             }
-                            .fullScreenCover(isPresented: $isPresented) {
-                                NewEventInformationView(event:$chosenEvent)
-                            }
+                         
                             .padding()
                             
                             //                                }
@@ -207,7 +210,10 @@ struct IndividualLabelEventView: View {
             .frame(width:geo.size.width , height:geo.size.height * 0.99)
 
             
-            .onAppear(perform:onAppear)
+//            .onAppear(perform:onAppear)
+            .onDisappear(perform: {
+                presentationMode.wrappedValue.dismiss()
+            })
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: btnBack)
             .navigationBarTitleDisplayMode(.inline)
@@ -229,18 +235,19 @@ struct IndividualLabelEventView: View {
             
         }
     }
-    private func fillEvent(event:EventModel){
+    private func fillEvent(event:EventModel,index:Int){
         self.chosenEvent = event
+        self.chosenIndex = index 
         isPresented.toggle()
         return
     }
-    private func onAppear(){
-        for (_,value) in eventDictionary {
-            
-            events.append(value)
-            
-        }
-    }
+//    private func onAppear(){
+//        for (_,value) in eventDictionary {
+//
+//            events.append(value)
+//
+//        }
+//    }
     private func RSVPEvent(event:EventModel){
         
         print("Event being chosen \(event)")

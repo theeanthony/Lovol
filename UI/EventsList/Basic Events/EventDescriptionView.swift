@@ -59,7 +59,7 @@ struct EventDescriptionView: View {
                             
                             VStack{
                                 HStack{
-                                    HeaderView(name: event.eventName,event:event)
+                                    HeaderView(inGroupError: false, name: event.eventName,event:$event)
  
                                     
                                 }
@@ -143,6 +143,8 @@ struct EventDescriptionView: View {
 //                                        .frame(width:geo.size.width * 0.07 , height:geo.size.width * 0.07)
 //                                    .aspectRatio(contentMode: .fit)
                                     .foregroundColor(.white)
+                                    .padding()
+                                    .background(Circle().fill(AppColor.lovolDark)).opacity(0.6)
                                     
                                 }
                                 .padding(.leading,15)

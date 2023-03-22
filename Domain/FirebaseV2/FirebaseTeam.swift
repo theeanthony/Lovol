@@ -56,6 +56,10 @@ struct FirebaseTeam : Identifiable{
     let resurrection : Int
     let isMember : Bool
     
+    let rsvps : [String]
+    let favoriteHosts : [String]
+    let followers : [String]
+    
     init(){
         self.id = ""
         self.teamName = ""
@@ -84,10 +88,13 @@ struct FirebaseTeam : Identifiable{
         self.totalEventsCompleted = 0
         self.multiplier = 0
         self.resurrection = 0
-        self.isMember = false 
+        self.isMember = false
+        self.favoriteHosts = []
+        self.rsvps = []
+        self.followers = []
         
     }
-    init(id:String,teamName:String,teamDescription:String,teamRule:Bool,teamPoints:Int,teamMemberNames:[String],teamMemberRoles:[String],teamMemberIDS:[String],suggestedEvents:[String],chosenEvent:String,requests:[String],achievements:[String],alliances:[String],exists:Bool,setTimeForChosenEvent:String,teamLovols:Int,lifeTimeLovols:Int,city:String,long:Double,lat:Double,timeCreated:String,locationSet:Bool,address:String,lifetimeLovolBits:Int,totalEventsCompleted:Int,multiplier:Int,resurrection:Int,isMember:Bool){
+    init(id:String,teamName:String,teamDescription:String,teamRule:Bool,teamPoints:Int,teamMemberNames:[String],teamMemberRoles:[String],teamMemberIDS:[String],suggestedEvents:[String],chosenEvent:String,requests:[String],achievements:[String],alliances:[String],exists:Bool,setTimeForChosenEvent:String,teamLovols:Int,lifeTimeLovols:Int,city:String,long:Double,lat:Double,timeCreated:String,locationSet:Bool,address:String,lifetimeLovolBits:Int,totalEventsCompleted:Int,multiplier:Int,resurrection:Int,isMember:Bool, rsvps : [String],favoriteHosts:[String],followers:[String]){
         self.id = id
         self.teamName = teamName
         self.teamDescription = teamDescription
@@ -116,6 +123,9 @@ struct FirebaseTeam : Identifiable{
         self.multiplier = multiplier
         self.resurrection = resurrection
         self.isMember = isMember
+        self.rsvps = rsvps
+        self.favoriteHosts = favoriteHosts
+        self.followers = followers
     }
     
     
@@ -164,6 +174,9 @@ extension FirebaseTeam: Codable {
             case multiplier
             case resurrection
             case isMember
+            case rsvps
+            case favoriteHosts
+            case followers
 //            case chosenTime 
 //            case teamPic
             

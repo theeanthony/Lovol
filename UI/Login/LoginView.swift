@@ -97,6 +97,31 @@ struct LoginView<Footer:View>: View {
                         
                         footer()
                             .padding(.top)
+                        
+                        HStack{
+                            Rectangle().fill(.white).frame(width:geo.size.width * 0.4,height:1)
+                            Text("Or")
+                                .font(.custom("Rubik Bold", size: 12)).foregroundColor(.white).opacity(0.6)
+                            Rectangle().fill(.white).frame(width:geo.size.width * 0.4,height:1)
+
+
+                        }
+                        .padding(.top)
+    //                    .frame(width:geo.size.width 0.9)
+                        
+                        
+                        Button(action: signUpWithApple) {
+                            HStack{
+                                Image(systemName:"applelogo").foregroundColor(.white)
+                                Text("Continue with Apple")
+                                   
+                            }
+                        }
+                        .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
+                        .padding(.vertical)
+                        .frame(width:geo.size.width * 0.9)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(AppColor.lovolPinkish))
+                        .padding(.top)
 
                         
 //                        LoginSignUpButton(action: {
@@ -120,6 +145,9 @@ struct LoginView<Footer:View>: View {
 
         }
 
+    }
+    private func signUpWithApple(){
+        authViewModel.signInWithApple()
     }
     func signIn(){
         isLoading = true

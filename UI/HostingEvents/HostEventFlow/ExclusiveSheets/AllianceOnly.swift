@@ -36,7 +36,7 @@ struct AllianceOnly: View {
             }
             Spacer()
         }
-        .background(AppColor.lovolDarkerPurpleBackground)
+        .background(AppColor.lovolDark)
 
     }
 }

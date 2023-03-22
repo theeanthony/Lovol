@@ -15,7 +15,7 @@ struct LoginAndSignUpView: View {
             LoginView() {
                 
                 NavigationLink("New User? Sign Up!", destination: SignUpEmailView())
-                    .font(.custom("Rubik Regular", size: 14)).underline().foregroundColor(.white).multilineTextAlignment(.center)
+                    .font(.custom("Rubik Regular", size: 20)).underline().foregroundColor(.white).multilineTextAlignment(.center)
                    
 
 //                    .hiddenNavigationBarStyle()

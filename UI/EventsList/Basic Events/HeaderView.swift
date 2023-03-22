@@ -6,12 +6,12 @@
 //
 
 import SwiftUI
-
+ 
 struct HeaderView: View{
-     
+    let inGroupError:Bool
     @EnvironmentObject private var eventViewModel : EventViewModel
     let name : String
-    let event : EventModel
+    @Binding var event : EventModel
     @State private var joinGroupFirstError : Bool = false
     @State private var eventSetAlreadyError : Bool = false
     @State private var showDownloadError : Bool = false
@@ -19,7 +19,8 @@ struct HeaderView: View{
     @State private var eventSaved : Bool = false
     @State private var eventRSVP : Bool = false
     @State private var totalRSVP : Int = 0
-    
+    @State private var showHostInformation : Bool = false
+
 
     var body: some View{
         //        GeometryReader{geo in
@@ -27,10 +28,12 @@ struct HeaderView: View{
             HStack{
                 Text(name)
                     .padding(.trailing)
-                    .font(.custom("Rubik Bold", size: 22))
+                    .font(.custom("Rubik Bold", size: 20))
                     .foregroundColor(.white).multilineTextAlignment(.center).frame( height: 20, alignment:.leading)
                     .padding(.leading, 15)
                 //                .frame(width:geo.size.width * 0.5)
+                
+          
                 Spacer()
                 if event.eventCompleted ?? false {
                     Button {
@@ -45,9 +48,9 @@ struct HeaderView: View{
                 }
      
                 Button {
-                    saveEvent(event: event)
+                    saveEvent()
                 } label: {
-                    if eventSaved {
+                    if event.didISave ?? false {
                         Image( systemName: "bookmark.fill")
                             .resizable()
                             .foregroundColor(.white)
@@ -68,26 +71,25 @@ struct HeaderView: View{
                 
                 if event.isTempEvent{
                     VStack{
-                        HStack{
-                            Text("Total RSVPs (\(totalRSVP))") .font(.custom("Rubik Regular", size: 12))
-                                .foregroundColor(.white)
-                            
-                            Button {
-                                
-                                RSVPEvent(event: event)
-                            } label: {
-                                Text("RSVP")
-                                    .foregroundColor(.white)
-                                    .padding(5)
-                                    .background(RoundedRectangle(cornerRadius:10).fill( LinearGradient(gradient: Gradient(colors: [ AppColor.lovolPinkish,AppColor.lovolNamePink]), startPoint: .top, endPoint: .bottom)))
-                            }
-                            if eventRSVP{
-                                Image(systemName:"checkmark").foregroundColor(.white)
-                            }
-                           
+                        if event.lastReviewName != ""{
+                            HStack{
+                                Button {
+                                    self.showHostInformation = true
+                                } label: {
+                                    Text("Hosted by \(event.lastReviewName)")
+                                        .font(.custom("Rubik Regular", size: 12))
+//                                    Text("\(event.lastReviewName)")
+//                                        .font(.custom("Rubik Bold", size: 12))
+                                    Image(systemName:"chevron.right")
 
-                            Spacer()
+                                }                                        .foregroundColor(.white)
+
+                                Spacer()
+                            }
+                     
+
                         }
+          
                         
                         if event.startingTime != nil{
                             VStack{
@@ -105,8 +107,28 @@ struct HeaderView: View{
                             }
                             .font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
 
-                            .padding(.vertical,3)
+//                            .padding(.vertical,3)
                             
+                        }
+                        HStack{
+                            Text("Total RSVPs (\(totalRSVP))") .font(.custom("Rubik Regular", size: 12))
+                                .foregroundColor(.white)
+                            
+                            Button {
+                                
+                                RSVPEvent()
+                            } label: {
+                                Text("RSVP")
+                                    .foregroundColor(.white)
+                                    .padding(5)
+                                    .background(RoundedRectangle(cornerRadius:10).fill( LinearGradient(gradient: Gradient(colors: [ AppColor.lovolPinkish,AppColor.lovolNamePink]), startPoint: .top, endPoint: .bottom)))
+                            }
+                            if eventRSVP{
+                                Image(systemName:"checkmark").foregroundColor(.white)
+                            }
+                           
+
+                            Spacer()
                         }
                     }
                     
@@ -114,7 +136,7 @@ struct HeaderView: View{
                 }
                 else{
                     HStack{
-                        Text(String(format: "%.1f%", event.eventTotalReviews != 0 ? event.eventReviewPercentage / Double(event.eventTotalReviews) : 0.0))
+                        Text(String(format: "%.1f%", event.eventTotalReviews != 0 ? event.eventReviewPercentage / Double(event.eventTotalReviews) : 0.0)).foregroundColor(.white)
                         Image(systemName:"star.fill")
                             .foregroundColor(.yellow)
                         Text("(\(event.eventTotalReviews))").opacity(0.5)
@@ -134,6 +156,7 @@ struct HeaderView: View{
                                 .foregroundColor(.white)
                         Spacer()
                     }
+                    .padding(.bottom,3)
                     HStack{
                         //                    Image(systemName:"mappin")
                         //                        .foregroundColor(.red)
@@ -145,11 +168,12 @@ struct HeaderView: View{
            
                 }
                 .padding(.leading, 15)
-                .padding(.top,3)
+                .padding(.bottom,3)
                 .font(.custom("Rubik Regular", size: 12))
 
 
             }
+  
 
         }
         .alert("You must be in a group to save this event", isPresented: $joinGroupFirstError, actions: {
@@ -163,6 +187,9 @@ struct HeaderView: View{
                })
            })
            .onAppear(perform:onAppear)
+           .fullScreenCover(isPresented: $showHostInformation) {
+               HostProfileDescription(inGroupError:inGroupError,hostId: event.lastReview,hostName:event.lastReviewName )
+           }
             
 //        }
     }
@@ -171,16 +198,29 @@ struct HeaderView: View{
         eventRSVP = event.didIRSVP ?? false
         totalRSVP = event.totalRSVP ?? 0
     }
-    private func RSVPEvent (event:EventModel){
+    private func RSVPEvent (){
          
         self.eventRSVP.toggle()
         if eventRSVP{
             totalRSVP += 1
+            event.totalRSVP! += 1
+            
+            print("true")
+            event.didIRSVP = true
         }else{
             totalRSVP -= 1
+            event.totalRSVP! -= 1
+
             if totalRSVP < 0 {
+
                 totalRSVP = 0
+                event.totalRSVP! = 0
+
             }
+            print("false")
+
+            event.didIRSVP = false
+
         }
         eventViewModel.rsvpToEvent(RSVP: eventRSVP,  event: event) { result in
             switch result{
@@ -193,7 +233,7 @@ struct HeaderView: View{
             }
         }
     }
-    private func saveEvent (event: EventModel){
+    private func saveEvent (){
         
         eventViewModel.saveEvent(id: event.id) { result in
             switch result {
@@ -203,10 +243,13 @@ struct HeaderView: View{
 //                return
             case .success(true):
 //                eventSetAlreadyError = true
+                event.didISave = true
                 eventSaved = true
                 return
 
             case .success(false):
+                event.didISave = false
+
                 eventSaved = false
                 return
             case .failure(_):

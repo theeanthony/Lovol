@@ -38,7 +38,7 @@ struct TeamMottoQuestionSheetView: View {
                 .frame(width:geo.size.width , height:geo.size.height)
             
 
-        .background(AppColor.lovolDarkerPurpleBackground)
+                .background(BackgroundView())
 
         }
     }

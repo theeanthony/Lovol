@@ -177,8 +177,8 @@ class RequestViewModel: NSObject, ObservableObject{
                }
                var alliances = document.get("alliances") as! [String]
                
-               if !alliances.contains(groupId){
-                   alliances.append(groupId)
+               if !alliances.contains(sendingID){
+                   alliances.append(sendingID)
                }
               groupRef.document(sendingID).updateData(["alliances":alliances])
                

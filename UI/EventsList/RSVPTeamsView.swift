@@ -39,6 +39,7 @@ struct RSVPTeamsView: View {
                             Spacer()
                             Text("No teams have RSVP'd")
                                 .font(.custom("Rubik Bold", size: 12)).foregroundColor(.white)
+                                .padding(.top,20)
                         Spacer()
                         }
                         

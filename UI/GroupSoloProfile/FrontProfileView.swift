@@ -15,7 +15,7 @@ struct FrontProfileView: View {
 
     let name: String
     let groupId : String
-    @State private var teamInfo : FirebaseTeam = FirebaseTeam(id: "", teamName: "", teamDescription: "", teamRule: false, teamPoints: 0, teamMemberNames: [], teamMemberRoles: [], teamMemberIDS: [], suggestedEvents: [], chosenEvent: "", requests: [], achievements: [], alliances: [], exists: false, setTimeForChosenEvent: "", teamLovols: 0, lifeTimeLovols: 0, city: "", long : 0, lat : 0, timeCreated: "", locationSet: false, address: "", lifetimeLovolBits: 0, totalEventsCompleted: 0,multiplier: 0,resurrection: 0,isMember:false)
+    @State private var teamInfo : FirebaseTeam = FirebaseTeam()
     @State private var teamPic : UIImage = UIImage()
     @State private var loadingTeamInfo : Bool = true
     
@@ -33,6 +33,8 @@ struct FrontProfileView: View {
     @State private var isPresent : Bool = false
     
     @State private var teamMembersPresented : Bool = false
+    
+    @State private var teamPicLoaded : Bool = false
     var body: some View {
         
         GeometryReader{geo in
@@ -44,7 +46,7 @@ struct FrontProfileView: View {
                     Spacer()
                     VStack{
                         ScrollView{
-                            ProfileFrameView(teamInfo:teamInfo,  image: teamPic )
+                            ProfileFrameView(teamInfo:teamInfo,  image: teamPic , teamPicLoaded:$teamPicLoaded)
                                 .frame(height:geo.size.height * 0.65)
                                 .padding(.bottom)
                             
@@ -52,6 +54,20 @@ struct FrontProfileView: View {
                                 VStack(spacing:15){
                                     
                                     Group{
+                                        Button {
+                                            
+                                        } label: {
+                                            NavigationLink(destination: SavedFrontView(  groupId:groupId, saves: teamInfo.suggestedEvents, rsvps:teamInfo.rsvps,long: teamInfo.long, lat: teamInfo.lat, locationSet: teamInfo.locationSet, alliances: teamInfo.alliances)) {
+                                                HStack{
+                                                    Text("Saved Events")
+                                                    Spacer()
+                                                    Image(systemName: "chevron.right")
+                                                }
+                                            }
+                                            
+                                        }
+                                        
+                                        ExDivider(color: .white.opacity(0.5))
                                         Button {
                                             
                                         } label: {
@@ -107,20 +123,6 @@ struct FrontProfileView: View {
                                             }
                                         }
                                         
-//                                        ExDivider(color: .white.opacity(0.5))
-//                                        Button {
-//
-//                                        } label: {
-//                                            NavigationLink(destination: AllianceFrameExpanded(alliances:$alliances, teamInfo: teamInfo)) {
-//                                                HStack{
-//                                                    Text("Alliances")
-//                                                    Spacer()
-//                                                    Image(systemName: "chevron.right")
-//                                                }
-//                                            }
-//
-//
-//                                        }
                                     }
                                     Group{
                                         
@@ -141,7 +143,7 @@ struct FrontProfileView: View {
                                         Button {
                                             
                                         } label: {
-                                            NavigationLink(destination: FrontHostEventView(groupId:groupId)) {
+                                            NavigationLink(destination: FrontHostEventView(inGroupError:false,groupId:groupId,hostName:teamInfo.teamName)) {
                                                 
                                                 HStack{
                                                     Text("Host An Activity")
@@ -150,20 +152,7 @@ struct FrontProfileView: View {
                                                 }
                                             }
                                         }
-//                                        ExDivider(color: .white.opacity(0.5))
-//                                        Button {
-//                                            isPresent = true
-////                                            inviteContacts()
-//                                        } label: {
-//                                            NavigationLink(destination: ContactList()) {
-//                                                HStack{
-//                                                    Text("Invite Contacts")
-//                                                    Spacer()
-//                                                    Image(systemName: "chevron.right")
-//                                                }
-//                                            }
-//                                        }
-                                        
+
                               
                                         
                                     }
@@ -184,6 +173,7 @@ struct FrontProfileView: View {
                             
                             
                         }//end of scroll
+                        .padding(.bottom,5)
 //                        .frame(width:geo.size.width * 0.95)
                     }//end of vstack
                     .frame(width:geo.size.width, height:geo.size.height * 0.95)
@@ -219,8 +209,7 @@ struct FrontProfileView: View {
             switch result {
             case .success(let image):
                 self.teamPic = image
-                loadingTeamInfo = false
-
+                self.teamPicLoaded = true
                 return
             case .failure(let error):
                 print("error fetching teampic \(error))")
@@ -231,66 +220,33 @@ struct FrontProfileView: View {
     }
 
     private func populate(){
-        if groupId.isEmpty{
-            profileViewModel.fetchMember { result in
-                switch result{
-                case .success(let member):
-                    profileViewModel.fetchTeam(id: member.groupId) { result in
-                        switch result{
-                        case .success(let team):
-                            self.teamInfo = team
-                            self.chosenEvent = team.chosenEvent
-                            self.alliances = team.alliances
-                            let dateFormatter = DateFormatter()
-                            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-                            let dateFromString = dateFormatter.date(from:team.setTimeForChosenEvent)!
-                            self.date = dateFromString
-                            fetchTeamPic()
-                            fillSuggestedEvents(team: team)
-            //                fillTrophies(team:team)
-            //                fillInInfo(team: team)
-            //                fillRequests(groupId: groupId)
-                            
-                            return
-                        case .failure(let error):
-                            fetchingError = true
-                            print("could not fetch team information \(error)")
-                            return
-                        }
-                    }
-                case .failure(let error):
-                    print("error fetching member to check group profile \(error)")
-                    
-                    fetchingError = true
-                    return
-                    
-                }
-            }
-        }else{
-            profileViewModel.fetchTeam(id: groupId) { result in
-                switch result{
-                case .success(let team):
-                    self.teamInfo = team
-                    self.chosenEvent = team.chosenEvent
-                    self.alliances = team.alliances
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-                    let dateFromString = dateFormatter.date(from:team.setTimeForChosenEvent)!
-                    self.date = dateFromString
-                    fetchTeamPic()
+
+        profileViewModel.fetchTeam(id: groupId) { result in
+            switch result{
+            case .success(let team):
+                self.teamInfo = team
+                self.chosenEvent = team.chosenEvent
+                self.alliances = team.alliances
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+                let dateFromString = dateFormatter.date(from:team.setTimeForChosenEvent)!
+                self.date = dateFromString
+                loadingTeamInfo = false
+
+                fetchTeamPic()
 //                    fillSuggestedEvents(team: team)
-    //                fillTrophies(team:team)
-    //                fillInInfo(team: team)
-    //                fillRequests(groupId: groupId)
-                    
-                    return
-                case .failure(let error):
-                    fetchingError = true 
-                    print("could not fetch team information \(error)")
-                    return
-                }
+//                fillTrophies(team:team)
+//                fillInInfo(team: team)
+//                fillRequests(groupId: groupId)
+                
+                return
+            case .failure(let error):
+                fetchingError = true
+                print("could not fetch team information \(error)")
+                return
             }
         }
+    
 
     }
 
@@ -302,7 +258,8 @@ struct FrontProfileView: View {
             case .success(let events):
                 self.suggestedEvents = events
                 
-   
+                loadingTeamInfo = false
+
                 
             case .failure(let error):
                 print("error fetching suggested Events \(error)")

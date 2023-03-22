@@ -11,7 +11,7 @@ struct SeeHostEventView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject private var eventViewModel : EventViewModel
-    
+    let inGroupError:Bool
     @Binding var id : String
      @State private var event : EventModel = EventModel()
     
@@ -59,7 +59,7 @@ struct SeeHostEventView: View {
                             
                             VStack{
                                 HStack{
-                                    HeaderView(name: event.eventName,event:event)
+                                    HeaderView(inGroupError:inGroupError,name: event.eventName,event:$event)
  
                                     
                                 }
@@ -71,7 +71,8 @@ struct SeeHostEventView: View {
                                 }
                                 .frame(width:geo.size.width * 0.9)
                      
-                      
+                                
+                                
                                 Section(header:ListHeader(text: "Rules")){
                                     BodyView(description: event.eventRules, tanOrNo: false)
                                         .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
@@ -82,13 +83,14 @@ struct SeeHostEventView: View {
                                 
                                 //                                .frame(width:geo.size.width)
                          
-                                
-                                Section(header:ListHeader(text: "Tips")){
-                                    BodyView(description: event.eventTips, tanOrNo: true)
-                                        .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
-                                        .padding(.vertical,10)
+                                if !event.eventTips.isEmpty{
+                                    Section(header:ListHeader(text: "Tips")){
+                                        BodyView(description: event.eventTips, tanOrNo: true)
+                                            .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
+                                            .padding(.vertical,10)
+                                    }
+                                    .frame(maxWidth: geo.size.width * 0.95)
                                 }
-                                .frame(maxWidth: geo.size.width * 0.95)
 
                                 //                                .frame(width:geo.size.width)
                         

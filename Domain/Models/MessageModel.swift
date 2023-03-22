@@ -3,7 +3,7 @@
 //  lovol_v2 (iOS)
 //
 //  Created by Anthony Contreras on 10/21/22.
-//
+// 
  
 import Foundation
 
@@ -13,9 +13,10 @@ struct MessageModel: Identifiable, Equatable{
     let timestamp: String?
     let message: String
     let name: String
+    let senderId: String
     
     static func from(id: String, _ msg: FirestoreMessage, currentUserId: String, name: String) -> MessageModel{
-        return MessageModel(id: id, isCurrentUser: msg.senderId == currentUserId, timestamp: msg.timestamp, message: msg.message, name: msg.senderName)
+        return MessageModel(id: id, isCurrentUser: msg.senderId == currentUserId, timestamp: msg.timestamp, message: msg.message, name: msg.senderName, senderId:msg.senderId)
     }
 }
 //struct MessageAllianceModel: Identifiable, Equatable{

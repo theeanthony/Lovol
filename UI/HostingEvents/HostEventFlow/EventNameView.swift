@@ -11,7 +11,7 @@ struct EventNameView: View {
     
     @Binding var eventName : String
     
-    @State private var charLimit : Int = 18
+    @State private var charLimit : Int = 25
     var body: some View {
         TextField("", text: $eventName, axis:.horizontal)
             .padding()
@@ -19,7 +19,9 @@ struct EventNameView: View {
             .padding()
 //                                .fixedSize()
             .placeholder(when: eventName.isEmpty) {
-            Text("").opacity(0.5).font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
+            Text("Add Event Name").opacity(0.5).font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
+                    .padding()
+                    .padding()
         }
             .onChange(of: eventName, perform: {newValue in
             if(newValue.count >= charLimit){

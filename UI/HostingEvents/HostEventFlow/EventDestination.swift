@@ -50,7 +50,7 @@ struct EventDestination: View {
                    self.cityName = city
                    self.long = longitude
                    self.lat = latitude
-                   self.eventAddress = address
+                   self.eventAddress = address + ", " + city + state 
                    }
                }
            }
@@ -78,7 +78,7 @@ struct EventDestination: View {
                     Image(systemName: "magnifyingglass")
                         .padding(.leading,15)
                     TextField("", text: $mapSearch.searchTerm).placeholder(when: mapSearch.searchTerm.isEmpty) {
-                        Text(eventAddress).foregroundColor(.white)
+                        Text("Address").foregroundColor(.white).opacity(0.6)
                         //                                    .padding(10)
                         
                     }
@@ -163,7 +163,7 @@ struct EventDestination: View {
         self.cityName = city
         self.long = longitude
         self.lat = latitude
-        self.eventAddress = address 
+        self.eventAddress = address + ", " + city + state 
         
     }
 }

@@ -85,7 +85,7 @@ struct JoinTeamSheetView: View {
                         Spacer()
                     }                }else{
                         if showTeam {
-                            NavigationLink(destination: AllianceFullFrameView(alliance: allianceSearch)) {
+                            NavigationLink(destination: AllianceFullFrameView(alliance: $allianceSearch)) {
                                 GeometryReader{geo in
                                     HStack{
                                         Image(uiImage: allianceSearch.teamPic)

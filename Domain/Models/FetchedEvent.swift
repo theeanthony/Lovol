@@ -25,6 +25,8 @@ struct FetchedEvent: Hashable {
     let didILike : Bool
     
     let timeStamp : String
+    let caption: String
+    var showCaption : Bool = false
     
     static func == (lhs: FetchedEvent, rhs: FetchedEvent) -> Bool {
         return lhs.id == rhs.id
@@ -46,7 +48,9 @@ extension FetchedEvent : Codable {
         case likes
         case comments
         case didILike
-        case timeStamp 
+        case timeStamp
+        case caption
+        case showCaption 
     }
 }
 

@@ -31,6 +31,15 @@ struct GroupChatView: View {
     @State private var messageList: [MessageModel] = []
     @State private var listener: ListenerRegistration? = nil
     @State private var isFirstMessageUpdate = true
+    
+    
+    @State private var pictureDictionary : [String:UIImage] = [:]
+    @State var isPictureLoaded = false
+    @State var totalProfilePicsToLoad : Int = 0
+    
+    @State var defaultPic: UIImage = UIImage()
+    @State private var updateView: Bool = false
+
 
     var body: some View {
             VStack{
@@ -39,8 +48,9 @@ struct GroupChatView: View {
                     ScrollView{
                         LazyVStack{
                             ForEach(messageList){ message in
-                                GroupMessageView(message: message, groupId: groupId, group: match)
+                                GroupMessageView(message: message, groupId: groupId, group: match,isPictureLoaded:$isPictureLoaded, personalPFP: $pictureDictionary[message.senderId])
                                     .id(message.id)
+                                
                             }
                         }
                     }
@@ -55,6 +65,8 @@ struct GroupChatView: View {
                             }
                         }
                     })
+           
+           
                 }
                 .padding(.top,30)
                 HStack {
@@ -117,6 +129,21 @@ struct GroupChatView: View {
                 }
             }
         .onAppear(perform: performOnAppear)
+        .onChange(of: isPictureLoaded) { _ in
+               // Trigger a redraw of the view when isPictureLoaded changes
+               updateView.toggle()
+           }
+        .background(
+                Group {
+                    if updateView {
+                        Rectangle()
+                            .fill(Color.clear)
+                            .onAppear {
+                                updateView.toggle()
+                            }
+                    }
+                }
+            )
         .onDisappear(perform: performOnDisappear)
     }
     
@@ -128,9 +155,141 @@ struct GroupChatView: View {
             switch result{
             case .success(let image):
                 match.picture = image
+                defaultPic = image
             case .failure (let error):
                 
                 print ("error fetching iage \(error)")
+            }
+        }
+    }
+    
+    private func fetchTeamIndividualPics(){
+        profileViewModel.fetchTeam(id: groupId) { result in
+            switch result{
+            case .success(let team):
+                
+                let teamIds = team.teamMemberIDS
+                
+                self.totalProfilePicsToLoad += teamIds.count
+//                print("teammates ids \(teamIds)")
+                for id in teamIds {
+                    profileViewModel.fetchMainPicture(profileId: id) { result in
+                        switch result{
+                        case .success(let image):
+                            self.pictureDictionary[id] = image
+                            print("ID OF picture \(id) and Image \(image)")
+
+                            self.totalProfilePicsToLoad -= 1
+                            
+                            if totalProfilePicsToLoad == 0 {
+                                print("switching picture loded")
+                                self.isPictureLoaded = true
+                            }
+                        case .failure(let error):
+                            print("error fetching my team picture \(error)")
+                            self.pictureDictionary[id] = match.picture
+                            return
+                        }
+                    }
+
+                }
+                
+            case .failure(let error):
+                print("error fetching team \(error)")
+
+            }
+        }
+    }
+    private func fetchBothSidePics(){
+        profileViewModel.fetchTeam(id: match.groupId) { result in
+            switch result{
+            case .success(let team):
+                
+                let teamIds = team.teamMemberIDS
+//                print("teammates other ids \(teamIds)")
+                profileViewModel.fetchTeam(id: groupId) { result in
+                    switch result{
+                    case .success(let team):
+                        
+                        let otherTeamIds = team.teamMemberIDS
+                        
+        //                print("teammates ids \(teamIds)")
+                        let bothTeamIds = teamIds + otherTeamIds
+                        self.totalProfilePicsToLoad = bothTeamIds.count
+
+                        print("total count \(totalProfilePicsToLoad)")
+
+                        for id in bothTeamIds {
+                            profileViewModel.fetchMainPicture(profileId: id) { result in
+                                switch result{
+                                case .success(let image):
+                                    self.pictureDictionary[id] = image
+                                    print("ID OF picture \(id) and Image \(image)")
+
+                                    self.totalProfilePicsToLoad -= 1
+                                    
+                                    if totalProfilePicsToLoad == 0 {
+                                        print("switching picture loded")
+                                        self.isPictureLoaded = true
+                                    }
+                                case .failure(let error):
+                                    print("error fetching my team picture \(error)")
+                                    self.pictureDictionary[id] = match.picture
+                                    return
+                                }
+                            }
+
+                        }
+                        
+                    case .failure(let error):
+                        print("error fetching team \(error)")
+
+                    }
+                }
+ 
+                
+            case .failure(let error):
+                print("error fetching team \(error)")
+
+            }
+        }
+    }
+    private func fetchOtherTeamPics(){
+        profileViewModel.fetchTeam(id: match.groupId) { result in
+            switch result{
+            case .success(let team):
+                
+                let teamIds = team.teamMemberIDS
+//                print("teammates other ids \(teamIds)")
+                self.totalProfilePicsToLoad += teamIds.count
+
+                for id in teamIds {
+                    profileViewModel.fetchMainPicture(profileId: id) { result in
+                        switch result{
+                        case .success(let image):
+                            
+                            self.pictureDictionary[id] = image
+                            
+                            print("ID OF picture \(id) and Image \(image)")
+                            self.totalProfilePicsToLoad -= 1
+                            
+                            if totalProfilePicsToLoad == 0 {
+                                print("switching picture loded")
+
+                                self.isPictureLoaded = true
+                            }
+                        case .failure(let error):
+                            print("error fetching other team picture \(error)")
+                            self.pictureDictionary[id] = match.picture
+                            return
+                        }
+                    }
+
+                }
+                
+            case .failure(let error):
+                print("error fetching team \(error)")
+
             }
         }
     }
@@ -142,16 +301,26 @@ struct GroupChatView: View {
         if fromNotification {
             fetchProfilePic()
         }
+        
         if match.groupId == groupId {
+            
+            fetchTeamIndividualPics()
             listener = profileViewModel.listenToGroupMessages(groupId: match.groupId, onUpdate: {result in
                 switch result{
                 case .success(let messages):
+                    
+                    
                     messageList = messages
+                    
+                  
                     return
                 case .failure(_): return
                 }
             })
         }else{
+      
+            fetchBothSidePics()
+
             listener = profileViewModel.listenToAllianceMessages(chatId:match.groupId,groupId: groupId, onUpdate: {result in
                 switch result{
                 case .success(let messages):
@@ -168,8 +337,11 @@ struct GroupChatView: View {
     private func sendMessage(){
         
         profileViewModel.sendGroupMessage(groupId: match.groupId, message: typingMessage, isOwn: match.groupId == groupId, teamNameTalkingTo: match.name)
+        let lastMessage = typingMessage
+
             typingMessage = ""
-            
+        let newMatch = ChatModel(id: match.id, groupId: match.groupId, name: match.name, picture: match.picture, lastMessage: lastMessage)
+        match = newMatch
 //            firestoreViewModel.sendMessage(matchId: match.id, message: typingMessage)
 //            typingMessage = ""
        

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FrontHostEventView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    let inGroupError:Bool
     var btnBack : some View { Button(action: {
           self.presentationMode.wrappedValue.dismiss()
           }) {
@@ -22,6 +23,7 @@ struct FrontHostEventView: View {
       }
     @EnvironmentObject private var eventViewModel : EventViewModel
     let groupId:String
+    let hostName:String
     @State private var addEvent : Bool = false
     @State private var pendingEvent : Bool = false
     
@@ -31,6 +33,7 @@ struct FrontHostEventView: View {
     @State private var chosenEvent : String = ""
     @State private var showTeamsGoing : Bool = false
     @State private var chosenSet : [String] = []
+    @State private var submittedEvent : Bool = false
     var body: some View {
         HStack{
             Spacer()
@@ -72,7 +75,7 @@ struct FrontHostEventView: View {
                 ScrollView{
                     ForEach(pastEvents.indices, id:\.self){
                         event in
-                        PastEventLabel(hostEvent: pastEvents[event], groupId: groupId)
+                        PastEventLabel(hostEvent: pastEvents[event], groupId: groupId, hostName: hostName)
                     }
                 }
                 Spacer()
@@ -88,13 +91,17 @@ struct FrontHostEventView: View {
         .navigationBarItems(leading: btnBack)
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $addEvent, content: {
-            FrontAddView(groupId: groupId)
+            SingleSheetView(groupId: groupId,hostName:hostName, submittedEvent: $submittedEvent)
         })
         .fullScreenCover(isPresented: $pendingEvent, content: {
             FrontPendingEvent(groupId: groupId)
         })
         .fullScreenCover(isPresented: $activateDescriptionView, content: {
-            SeeHostEventView(id: $chosenEvent)
+            SeeHostEventView(inGroupError:inGroupError,id: $chosenEvent)
+        })
+        .sheet(isPresented: $submittedEvent, content: {
+            QuickSheet(text: "Your submitted event is now pending. Please give us some time to review your event.")
+                .presentationDetents([.medium])
         })
 
         .toolbar{

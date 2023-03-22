@@ -57,7 +57,7 @@ struct LiveShow: View {
                 LinearGradient(gradient: Gradient(colors: [AppColor.lovolPinkish, AppColor.lovolOrange]), startPoint: .top, endPoint: .bottom)
             )
             .fullScreenCover(isPresented: $isPresented) {
-                ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!), isPresented: $isPresented)
+                ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!))
             }
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: btnBack)

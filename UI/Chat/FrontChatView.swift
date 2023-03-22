@@ -31,6 +31,8 @@ struct FrontChatView: View {
     @State private var loadingGroupChats : Bool = true
     
     @State private var initialImage : UIImage = UIImage()
+    
+    @State private var chosenIndex : Int = 0
     var body: some View {
         GeometryReader{geo in
             VStack{
@@ -41,6 +43,7 @@ struct FrontChatView: View {
 
                 }else{
                     VStack{
+                        Spacer()
                         ScrollView{
                             if teamInfo.id != "" {
                                 
@@ -61,7 +64,7 @@ struct FrontChatView: View {
                                         chat in
                                         
                                         Button {
-                                            fillOtherChosen(chat:groupChats[chat])
+                                            fillOtherChosen(chat:groupChats[chat], index: chat)
                                         } label: {
                                             ChatItemView(model: groupChats[chat])
                                         }
@@ -86,7 +89,8 @@ struct FrontChatView: View {
                            
 
                         }
-                        .frame(width:geo.size.width, height:geo.size.height * 0.95)
+                        .frame(width:geo.size.width, height:geo.size.height * 0.9)
+                        .padding(.vertical,5)
                     }
                 }
                 
@@ -100,7 +104,8 @@ struct FrontChatView: View {
                             presentationMode.wrappedValue.dismiss()
                         } label: {
                             Image(systemName:"xmark").foregroundColor(.white)
-
+                                .padding()
+                                .background(Circle().fill(AppColor.lovolDark).opacity(0.6))
                         }
                         Spacer()
                         
@@ -108,6 +113,13 @@ struct FrontChatView: View {
                             .font(.custom("Rubik Bold", size: 12))
                                 .foregroundColor(.white)
                         Spacer()
+                        Button {
+                            self.newMessage = true 
+                        } label: {
+                            Image(systemName:"plus").foregroundColor(.white)
+                        }
+                        .padding(.trailing,10)
+
 //                        Button {
 //
 //                        } label: {
@@ -122,10 +134,13 @@ struct FrontChatView: View {
                 GroupChatView(match: $groupChat, groupId:teamInfo.id,fromNotification: false)
             }
             .fullScreenCover(isPresented: $chatOtherFullScreen) {
-                GroupChatView(match: $chosenMessage,groupId:teamInfo.id,fromNotification: false)
+                GroupChatView(match: $groupChats[chosenIndex],groupId:teamInfo.id,fromNotification: false)
             }
             .fullScreenCover(isPresented: $addChat) {
                 
+            }
+            .fullScreenCover(isPresented: $newMessage) {
+                NewGroupChatView(teamInfo:teamInfo,newGroupChats:$groupChats)
             }
             
             
@@ -133,13 +148,13 @@ struct FrontChatView: View {
     }
     private func fillChosen(){
         self.chosenMessage = groupChat
-
+        
 
         self.chatFullScreen = true
     }
-    private func fillOtherChosen(chat:ChatModel){
+    private func fillOtherChosen(chat:ChatModel,index:Int){
         self.chosenMessage = chat
-
+        self.chosenIndex = index
         print("Chat id : \(chat.groupId)")
         self.chatOtherFullScreen = true
     }

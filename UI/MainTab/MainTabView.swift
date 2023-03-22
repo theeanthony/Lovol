@@ -22,7 +22,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selection) {
                 NavigationStack {
-                    SingleEventView()
+                    SingleEventView(selection:$selection)
                 }
                 
                 .tabItem {
@@ -49,7 +49,7 @@ struct MainTabView: View {
 
                 NavigationStack {
 //                    GroupOrSoloView(groupId: groupId)
-                    FeedView()
+                    FeedView(tag:$selection)
 
                 }
                 .tabItem {
@@ -60,6 +60,7 @@ struct MainTabView: View {
                     .tag(3)
                 NavigationStack{
                     MainProfileView()
+
                 }
                 .tabItem {
 //                    Label("Profile", systemImage: "face.smiling.fill")

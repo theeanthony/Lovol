@@ -38,7 +38,7 @@ struct BonusMusicEvent: View {
                         .padding(.top,10)
                     ExampleVideoFrame(isPresented: $isPresented)
                         .fullScreenCover(isPresented: $isPresented) {
-                            ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!), isPresented: $isPresented)
+                            ExampleVideoView(player: AVPlayer(url: URL(string: videoURL)!))
                         }
                         .padding(.top,20)
                     

@@ -12,6 +12,8 @@ struct AddEventView: View {
     @EnvironmentObject private var eventViewModel : EventViewModel
     @State private var listHeaders : [String] = ["Event Name", "Event Description", "Event Destination", "Event Rules","Event Tips", "Event Offerings","Event Times", "Event Tags", "Event Exclusivity", "Event Fee", "Event Age", "Event Picture", "",""]
     let groupId:String
+    let hostName:String
+
     let hostEvent : HostEvent
     @State private var eventName : String = ""
     @State var eventDescription : String = ""
@@ -176,7 +178,7 @@ struct AddEventView: View {
         self.eventTags = hostEvent.eventTags
         self.exclusivity = hostEvent.exclusivity
         self.eventFee = hostEvent.eventFee
-        self.over21 = hostEvent.over21
+//        self.over21 = hostEvent.over21
         self.eventAddress = hostEvent.eventAddress
         
         
@@ -202,7 +204,7 @@ struct AddEventView: View {
                 switch result{
                 case .success(let live):
                     let eventMonth = live.season
-                    let eventModel : HostEvent = HostEvent(hostId:groupId,eventId: hostEvent.eventId, eventName: eventName, eventDescription: eventDescription, eventRules: eventRules, eventTips: eventTips, eventOfferings: eventOfferings, eventAddress: eventAddress, eventCityName: eventAddress, eventLongCoord: eventLong, eventLatCoord: eventLat, eventStartTime: eventStartTime, eventEndTime: eventEndTime, eventTags: eventTags, exclusivity: exclusivity, eventFee: eventFee, over21: over21, photoURL: "",  note: "", isActive: false, isRejected:false,isCompleted: false, eventMonth: eventMonth)
+                    let eventModel : HostEvent = HostEvent(hostId:groupId, hostName: hostName,eventId: hostEvent.eventId, eventName: eventName, eventDescription: eventDescription, eventRules: eventRules, eventTips: eventTips, eventOfferings: eventOfferings, eventAddress: eventAddress, eventCityName: eventAddress, eventLongCoord: eventLong, eventLatCoord: eventLat, eventStartTime: eventStartTime, eventEndTime: eventEndTime, eventTags: eventTags, exclusivity: exclusivity, eventFee: eventFee, photoURL: "",  note: "", isActive: false, isRejected:false,isCompleted: false, eventMonth: eventMonth)
                     self.uploadingEvent = true
                     eventViewModel.submitHostEvent(uploadedImage: uploadedImage, groupId: groupId, event: eventModel) { result in
                         switch result{

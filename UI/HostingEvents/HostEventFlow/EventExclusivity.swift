@@ -27,7 +27,7 @@ struct EventExclusivity: View {
 
                         .padding()
                         .frame(width:200)
-                        .background(RoundedRectangle(cornerRadius:30).fill(exclusivity == 0 ? AppColor.lovolOrange : AppColor.lovolDarkerPurpleBackground))
+                        .background(RoundedRectangle(cornerRadius:30).fill(exclusivity == 0 ? AppColor.lovolPinkish : AppColor.lovolDarkerPurpleBackground))
                 }
                 Button {
                     allianceOnlyQuestionSheet.toggle()
@@ -43,34 +43,13 @@ struct EventExclusivity: View {
                 self.exclusivity = 1
 
             } label: {
-                Text("Alliances and Alliances of Alliances")
+                Text("Public")
                     .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
 
                     .padding()
                     .frame(width:200)
 
-                    .background(RoundedRectangle(cornerRadius:30).fill(exclusivity == 1 ? AppColor.lovolOrange : AppColor.lovolDarkerPurpleBackground))
-                }
-                Button {
-                    alliancePlusQuestionSheet.toggle()
-                } label: {
-                    Image(systemName:"questionmark.circle.fill").foregroundColor(.white)
-                }
-            }
-            .padding(.vertical)
-
-            HStack{
-                Button {
-                    self.exclusivity = 2
-                    
-                } label: {
-                    Text("Public")
-                        .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
-
-                        .padding()
-                        .frame(width:200)
-                    
-                        .background(RoundedRectangle(cornerRadius:30).fill(exclusivity == 2 ? AppColor.lovolOrange : AppColor.lovolDarkerPurpleBackground))
+                    .background(RoundedRectangle(cornerRadius:30).fill(exclusivity == 1 ? AppColor.lovolPinkish : AppColor.lovolDarkerPurpleBackground))
                 }
                 Button {
                     publicQuestionSheet.toggle()
@@ -79,6 +58,27 @@ struct EventExclusivity: View {
                 }
             }
             .padding(.vertical)
+
+//            HStack{
+//                Button {
+//                    self.exclusivity = 2
+//
+//                } label: {
+//                    Text("Public")
+//                        .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
+//
+//                        .padding()
+//                        .frame(width:200)
+//
+//                        .background(RoundedRectangle(cornerRadius:30).fill(exclusivity == 2 ? AppColor.lovolOrange : AppColor.lovolDarkerPurpleBackground))
+//                }
+//                Button {
+//                    publicQuestionSheet.toggle()
+//                } label: {
+//                    Image(systemName:"questionmark.circle.fill").foregroundColor(.white)
+//                }
+//            }
+//            .padding(.vertical)
 
             
             

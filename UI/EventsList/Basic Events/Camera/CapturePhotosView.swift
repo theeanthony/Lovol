@@ -16,6 +16,7 @@ struct CapturePhotosView : View{
     @EnvironmentObject private var eventViewModel : EventViewModel
     @State var takenPhotos : [UIImage] = []
     @State private var takenPhoto : UIImage = UIImage()
+    @State private var takenVideo : URL?
     
     @State private var selectedContentType: UIImagePickerController.SourceType =
         .camera
@@ -36,8 +37,12 @@ struct CapturePhotosView : View{
     @Binding var totalPointsEarned : Int
     @Binding var reviewSheet : Bool
     @Binding var isCelebrationPresent : Bool
+    @State private var confirmedSubmission : Bool = false
+    @State private var editingVideo : Bool = false
     
     @State private var askForConfirmation: Bool = false
+    
+    @State private var videoTaken : Bool = false
     var maxPhotos : Int = 6
     
     var event : EventModel
@@ -55,7 +60,7 @@ struct CapturePhotosView : View{
                     Text(event.eventRules)
                     .padding(.bottom)
                     Text("Only one person from your team has to submit pictures for your team to get lovol bits.")
-                    Text("1 - 6 photos are allowed.")
+                    Text("Utilize 1 - 6 photos and or 10 second video.")
                         .padding(.top)
 
 
@@ -80,10 +85,35 @@ struct CapturePhotosView : View{
                                 .resizable()
                                 .centerCropped()
                                 .frame(width:80,height:80)
-                                .clipShape(Circle())
+                                .clipShape(RoundedRectangle(cornerRadius:10))
+                                .overlay(RoundedRectangle(cornerRadius:10).stroke(.white,lineWidth:1))
                         }
                         
                     }
+                    if let takenVideo = takenVideo {
+                        Button {
+                            self.editingVideo = true
+                        } label: {
+                            ZStack {
+                                if let thumbnail = generateThumbnail(for: takenVideo) {
+                                    Image(uiImage: thumbnail)
+                                        .resizable()
+                                        .centerCropped()
+                                } else {
+                                    // Display placeholder image
+                                    Image(systemName: "play.circle")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .frame(width: 80, height: 80)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(.white, lineWidth: 1))
+                        }
+                    }
+
+
+                    
                     
                 }
                 
@@ -96,8 +126,10 @@ struct CapturePhotosView : View{
                 
                 if takenPhotos.count < 6 {
                     self.takePicture = true
+                    
+                }
 
-                }else{
+            else{
                     self.noMorePhotosError = true 
                 }
             } label: {
@@ -110,7 +142,7 @@ struct CapturePhotosView : View{
             .padding()
             Spacer()
             
-            if !takenPhotos.isEmpty{
+            if !takenPhotos.isEmpty || videoTaken  {
                 Button {
                     self.askForConfirmation = true
                 } label: {
@@ -144,7 +176,10 @@ struct CapturePhotosView : View{
             }.padding()
         )
         .fullScreenCover(isPresented: $takePicture) {
-            ImagePicker(sourceType:selectedContentType, selectedImage: $takenPhoto)
+            EventImagePicker(sourceType:selectedContentType, selectedImage: $takenPhoto,selectedVideo:$takenVideo)
+        }
+        .fullScreenCover(isPresented: $askForConfirmation) {
+            ConfirmImages(videos:takenVideo!,images:takenPhotos, event: event, reviewSheet: $reviewSheet,totalPointsEarned:$totalPointsEarned,isCelebrationPresent:$isCelebrationPresent, confirmedSubmission:$confirmedSubmission)
         }
         .onChange(of: takenPhoto) { newValue in
 
@@ -154,6 +189,17 @@ struct CapturePhotosView : View{
 
             self.takenPhoto = initialPhoto
         }
+        .onChange(of: takenVideo) { newValue in
+            guard let newVideo = newValue else { return } // check if newValue is nil
+            self.videoTaken = true
+            self.takenVideo = newValue
+        }
+
+        .onChange(of: confirmedSubmission, perform: { newValue in
+            if newValue{
+                presentationMode.wrappedValue.dismiss()
+            }
+        })
         .alert("Do you want to delete this picture?", isPresented: $editingPicture, actions: {
             Button("Yes", role: .destructive, action: {
                 takenPhotos.remove(at: editIndex)
@@ -161,22 +207,26 @@ struct CapturePhotosView : View{
                 
 
             })
+            .alert("Do you want to delete this picture?", isPresented: $editingVideo, actions: {
+                Button("Yes", role: .destructive, action: {
+                    self.takenVideo = nil 
+                    self.editingVideo = false
+                    
+                    
+                })
+            })
             Button("No",role:.cancel, action:{
                 self.editingPicture = false
                 
             })
         })
-        .alert("Confirm that these are the pictures you are submitting.", isPresented: $askForConfirmation, actions: {
-            Button("Yes", role: .none, action: {
-          
-                submitPhoto()
+
+        .alert("Only a maximum of 6 photos are allowed", isPresented: $noMorePhotosError, actions: {
+            Button("OK", role: .cancel, action: {
 
             })
-            Button("No",role:.cancel, action:{
-                self.askForConfirmation = false
-            })
         })
-        .alert("Only a maximum of 6 photos are allowed", isPresented: $noMorePhotosError, actions: {
+        .alert("Only one video per", isPresented: $noMorePhotosError, actions: {
             Button("OK", role: .cancel, action: {
 
             })
@@ -194,48 +244,6 @@ struct CapturePhotosView : View{
 //    }
     private func onAppear(){
         self.initialPhoto = takenPhoto
-    }
-    private func submitPhoto(){
-        
-        pictureSubmitted = true
-        if takenPhotos.isEmpty {
-            return
-        }
-        
-        self.loadingPics = true
-        eventViewModel.submitEvent(useMultiplier:false,isGlobal:false,event: event, photo: takenPhotos) { result in
-            switch result {
-
-            case .success(let numberOfPoints):
-                self.loadingPics = false
-
-                pictureSubmitted = false
-                self.totalPointsEarned = numberOfPoints
-                print("points in this \(numberOfPoints)")
-                reviewSheet = true
-                presentationMode.wrappedValue.dismiss()
-                self.isCelebrationPresent = true
-                self.loadingPics = false
-
-//                dismiss()
-            case .failure(let error):
-                
-                if error == .downloadError{
-                    pictureSubmitted = false
-                    print("error submitting photo for event \(error)")
-                    self.loadingPics = false
-
-                    uploadError = true
-                    return
-                }
-                else {
-//                    alreadySubmittedEvent = true
-                    self.loadingPics = false
-                    pictureSubmitted = false
-                }
-            }
-        }
-        
     }
 
    

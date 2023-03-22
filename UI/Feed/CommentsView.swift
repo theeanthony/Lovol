@@ -76,6 +76,7 @@ struct CommentsView: View {
 
 //            .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolTan).opacity(0.6))
             .padding(.vertical,10)
+            .padding(.top,30)
         }
         .overlay(
             
@@ -86,6 +87,8 @@ struct CommentsView: View {
                     } label: {
                         Image(systemName:"xmark")
                             .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(AppColor.lovolDark)).opacity(0.6)
                     }
 
                     Spacer()

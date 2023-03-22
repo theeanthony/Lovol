@@ -4,7 +4,7 @@
 //
 //  Created by Anthony Contreras on 12/7/22.
 //
-
+ 
 import Foundation
 import Firebase
 import FirebaseFirestore
@@ -248,7 +248,7 @@ class ProfilesViewModel: NSObject, ObservableObject{
     }
     
     func fetchMainPicture(profileId: String, onCompletion: @escaping(Result<UIImage, DomainError>)->()){
-        print("fetching main pic")
+        print("fetching main pic \(profileId)")
         let picRef = storage.child("users_v2").child(profileId).child("profile_pic_0.jpg")
         picRef.getData(maxSize: self.IMG_MAX_SIZE) { data, error in
                 if error != nil {
@@ -612,8 +612,7 @@ class ProfilesViewModel: NSObject, ObservableObject{
     private func getChatId(userId1: String, userId2: String) -> String {userId1 > userId2 ? userId1 + userId2 : userId2 + userId1}
 
     func fetchAllianceConvos(groupId:String, ids: [String], subPic:UIImage,onCompletion: @escaping (Result<[ChatModel], DomainError>)->()){
-        
-        
+
         var count = 0
         var maxCount = ids.count
         
@@ -621,17 +620,13 @@ class ProfilesViewModel: NSObject, ObservableObject{
             onCompletion(.success([]))
             return
         }
-        
         var chatModels : [ChatModel] = []
         
         for id in ids{
-//            self.fetchGroupMainPicture(profileId: id, onCompletion: {pictureResult in
-//                switch pictureResult{
-//                case .success(let picture):
+
                     self.db.collection("chats").document(self.getChatId(userId1: groupId, userId2: id)).collection("messages").order(by: "timestamp", descending: false).getDocuments { query, error in
                         guard let doc = query , error == nil else {
-//                            onCompletion(.failure(.downloadError))
-//                            return
+
                             count += 1
                             return
                         }
@@ -643,9 +638,9 @@ class ProfilesViewModel: NSObject, ObservableObject{
                             }
                             let teamName = document.get("teamName") as! String
                             if  doc.isEmpty {
-                                let groupMatch = ChatModel(id: id, groupId: id, name: teamName, picture: subPic, lastMessage: nil)
-                                
-                                chatModels.append(groupMatch)
+//                                let groupMatch = ChatModel(id: id, groupId: id, name: teamName, picture: subPic, lastMessage: nil)
+//                                
+//                                chatModels.append(groupMatch)
                                 count += 1
                                 
                                 if count == maxCount {
@@ -675,12 +670,70 @@ class ProfilesViewModel: NSObject, ObservableObject{
 
                     }
 
-//
-//                case .failure(let error):
-//                    onCompletion(.failure(error))
-//                    return
-//                }
-//            })
+        }
+
+        
+        
+    }
+    func fetchAllianceEmptyConvos(groupId:String, ids: [String], subPic:UIImage,onCompletion: @escaping (Result<[ChatModel], DomainError>)->()){
+
+        var count = 0
+        var maxCount = ids.count
+        
+        if maxCount == 0 {
+            onCompletion(.success([]))
+            return
+        }
+        var chatModels : [ChatModel] = []
+        
+        for id in ids{
+
+                    self.db.collection("chats").document(self.getChatId(userId1: groupId, userId2: id)).collection("messages").order(by: "timestamp", descending: false).getDocuments { query, error in
+                        guard let doc = query , error == nil else {
+
+                            count += 1
+                            return
+                        }
+                        self.db.collection("group_v2").document(id).getDocument { document, error in
+                            guard let document = document, error == nil else {
+                                onCompletion(.failure(.downloadError))
+                                count += 1
+                                return
+                            }
+                            let teamName = document.get("teamName") as! String
+                            if  doc.isEmpty {
+                                let groupMatch = ChatModel(id: id, groupId: id, name: teamName, picture: subPic, lastMessage: nil)
+
+                                chatModels.append(groupMatch)
+                                count += 1
+                                
+                                if count == maxCount {
+                                    onCompletion(.success(chatModels))
+                                    return
+
+                                }
+                                
+                            }
+                            else{
+//                                let lastMessageIndex = doc.count - 1
+//                                let lastDocument = doc.documents[lastMessageIndex]
+//                                let lastMessage = lastDocument.get("message") as! String
+//                                let groupMatch = ChatModel(id: id, groupId: id, name: teamName, picture: subPic, lastMessage: lastMessage)
+//                                print("Last message \(lastMessage)")
+//                                chatModels.append(groupMatch)
+                                count += 1
+                                
+                                if count == maxCount {
+                                    onCompletion(.success(chatModels))
+                                    return
+
+                                }
+                            }
+                            
+                        }
+
+                    }
+
         }
 
         
@@ -859,7 +912,7 @@ class ProfilesViewModel: NSObject, ObservableObject{
         
 //        let randomID : String = UUID().uuidString.substring(fromIndex: 26)
         let randomID = id 
-        let firebaseTeam : FirebaseTeam = FirebaseTeam(id: randomID, teamName: info.teamName, teamDescription: info.teamDescription, teamRule: info.teamRule, teamPoints: 0, teamMemberNames: [name], teamMemberRoles: [role], teamMemberIDS: [userId!] ,suggestedEvents: [], chosenEvent: "", requests: [],achievements: [], alliances: [], exists: true, setTimeForChosenEvent: "", teamLovols: 0, lifeTimeLovols: 0, city: "", long : 0, lat: 0, timeCreated: "", locationSet: false, address: "", lifetimeLovolBits: 0, totalEventsCompleted: 0,multiplier:0,resurrection:0,isMember: false)
+        let firebaseTeam : FirebaseTeam = FirebaseTeam(id: randomID, teamName: info.teamName, teamDescription: info.teamDescription, teamRule: info.teamRule, teamPoints: 0, teamMemberNames: [name], teamMemberRoles: [role], teamMemberIDS: [userId!] ,suggestedEvents: [], chosenEvent: "", requests: [],achievements: [], alliances: [], exists: true, setTimeForChosenEvent: "", teamLovols: 0, lifeTimeLovols: 0, city: "", long : 0, lat: 0, timeCreated: "", locationSet: false, address: "", lifetimeLovolBits: 0, totalEventsCompleted: 0,multiplier:0,resurrection:0,isMember: false,rsvps:[],favoriteHosts: [],followers: [])
         
         var set : [String : Any] = firebaseTeam.dictionary
         set["timeCreated"] = FieldValue.serverTimestamp()
@@ -1123,10 +1176,10 @@ class ProfilesViewModel: NSObject, ObservableObject{
                     let memberModel : MemberModel = MemberModel(id: teamMemberIDS[index], name: teamMemberNames[index], role: teamMemberRoles[index], pic: UIImage())
                     memberModels.append(memberModel)
                 }
-                self.fetchGroupMainPicture(profileId: id) { result in
-                    switch result {
-                    case .success(let teamPic):
-                        let alliance : AllianceModel = AllianceModel(groupId: groupId, teamName: teamName, teamDescription: teamDescription, memberModel: memberModels, teamPic: teamPic)
+//                self.fetchGroupMainPicture(profileId: id) { result in
+//                    switch result {
+//                    case .success(let teamPic):
+                        let alliance : AllianceModel = AllianceModel(groupId: groupId, teamName: teamName, teamDescription: teamDescription, memberModel: memberModels, teamPic: UIImage())
                         allianceModel.append(alliance)
                         
                         count += 1
@@ -1135,19 +1188,19 @@ class ProfilesViewModel: NSObject, ObservableObject{
                             onCompletion(.success(allianceModel))
                             return
                         }
-                    case .failure(let error):
-                        print("error fetching team pic \(error)")
-                        let alliance : AllianceModel = AllianceModel(groupId: groupId, teamName: teamName, teamDescription: teamDescription, memberModel: memberModels, teamPic: UIImage(named: "elon_musk")!)
-                        allianceModel.append(alliance)
-                        
-                        count += 1
-                        
-                        if count == maxCount {
-                            onCompletion(.success(allianceModel))
-                            return
-                        }
-                    }
-                }
+//                    case .failure(let error):
+//                        print("error fetching team pic \(error)")
+//                        let alliance : AllianceModel = AllianceModel(groupId: groupId, teamName: teamName, teamDescription: teamDescription, memberModel: memberModels, teamPic: UIImage(named: "elon_musk")!)
+//                        allianceModel.append(alliance)
+//
+//                        count += 1
+//
+//                        if count == maxCount {
+//                            onCompletion(.success(allianceModel))
+//                            return
+//                        }
+//                    }
+//                }
 
                 
 
@@ -1436,6 +1489,93 @@ class ProfilesViewModel: NSObject, ObservableObject{
             
         }
 
+        
+        
+    }
+    func followHost(follow:Bool,followingId : String, followerId:String, onCompletion: @escaping(Result<Void,DomainError>)->()){
+        
+        let groupRef = db.collection("group_v2")
+        print("Following id \(followingId) and followerId \(followerId)")
+        
+        groupRef.document(followerId).getDocument { document, error in
+            guard let document = document , error == nil else {
+                onCompletion(.failure(.downloadError))
+                return
+            }
+            var followerList = document.get("favoriteHosts") as! [String]
+            groupRef.document(followingId).getDocument { doc, error in
+                guard let doc = doc , error == nil else {
+                    onCompletion(.failure(.downloadError))
+                    return
+                }
+                var followingList = doc.get("followers") as! [String]
+                
+                if follow {
+                    print("following")
+                    var count = 0
+                    for id in followerList {
+                        if id == followingId {
+                           break
+                        }
+                        count += 1
+                    }
+                    if count == followerList.count{
+                        followerList.append(followingId)
+                        groupRef.document(followerId).updateData([
+                            "favoriteHosts" : followerList
+                        ])
+                    }
+                    
+                    count = 0
+                    for id in followingList {
+                        if id == followerId {
+                            break
+                        }
+                        count += 1
+                    }
+                    if count == followingList.count{
+                        followingList.append(followerId)
+                        print("adding to followers")
+                        groupRef.document(followingId).updateData([
+                            "followers" : followingList
+                        ])
+                    }
+                    onCompletion(.success(()))
+                    return
+                }else{
+                    print("Unfollowing")
+                    var count = 0
+                    for id in followerList {
+                        if id == followingId {
+                            followerList.remove(at: count)
+                            groupRef.document(followingId).updateData([
+                                "favoriteHosts" : followerList
+                            ])
+                            break
+                        }
+                        count += 1
+                    }
+               
+                    
+                    count = 0
+                    for id in followingList {
+                        if id == followerId {
+                            followingList.remove(at: count)
+                            groupRef.document(followingId).updateData([
+                                "followers" : followingList
+                            ])
+                            break
+                        }
+                        count += 1
+                    }
+        
+                    onCompletion(.success(()))
+                    return
+                }
+                
+            }
+        }
+        
         
         
     }
@@ -1754,13 +1894,191 @@ class ProfilesViewModel: NSObject, ObservableObject{
                     print(error)
                 }
             }
-
+ 
             onUpdate(.success(messages))
 
         })
 
         return listener
     }
+    
+    func exchangeTokens(quantity:Int,cost: Int, groupId : String, onCompletion:@escaping(Result<Bool,DomainError>)->()){
+        
+        let groupRef = db.collection("group_v2").document(groupId)
+        groupRef.getDocument { document, error in
+            guard let document = document, error == nil else {
+                onCompletion(.failure(.downloadError))
+                return
+            }
+            
+            var currentLovolBits = document.get("teamPoints") as! Int
+            var currentLovols = document.get("teamLovols") as! Int
+            
+            var lifeTimeLovols = document.get("lifeTimeLovols") as! Int
+            
+            if cost > currentLovolBits {
+                onCompletion(.success(false))
+                return
+            }
+            
+            currentLovolBits -= cost
+            currentLovols += quantity
+            
+            lifeTimeLovols += quantity
+            
+            groupRef.updateData([
+                "teamPoints" : currentLovolBits,
+                "teamLovols" : currentLovols,
+                "lifeTimeLovols" : lifeTimeLovols
+            ])
+            onCompletion(.success(true))
+            return
+            
+            
+        }
+        
+        
+        
+    }
+    
+    func joinTeamFromRequest(groupId:String,onCompletion:@escaping(Result<Bool,DomainError>)->()){
+            
+        self.fetchTeam(id: groupId) { result in
+            switch result{
+            case .success(let team):
+                if team.teamMemberIDS.count >= 6 {
+                    onCompletion(.success(true))
+                    return
+                }
+                
+                self.fetchMember { result in
+                    switch result{
+                        
+                    case .success(let member):
+                        
+                        var newTeamIDS = team.teamMemberIDS
+                        newTeamIDS.append(member.id)
+                        var newTeamNames = team.teamMemberNames
+                        newTeamNames.append(member.name)
+
+                        var newTeamRoles = team.teamMemberRoles 
+                        newTeamRoles.append(member.role)
+
+                        self.db.collection("group_v2").document(groupId).updateData([
+                        
+                            "teamMemberIDS" : newTeamIDS,
+                            "teamMemberNames" : newTeamNames ,
+                            "teamMemberRoles" : newTeamRoles
+                        ])
+                        self.db.collection("users_v2").document(self.userId!).updateData([
+                            "groupId" : groupId
+                        ])
+                        
+                        onCompletion(.success(true))
+                        return
+                        
+                    case .failure(let error):
+                        print("err \(error)")
+                        onCompletion(.failure(.downloadError))
+                        return
+                    }
+                }
+            case .failure(let error):
+                print("err \(error)")
+                onCompletion(.failure(.downloadError))
+                return
+        }
+            
+            
+
+        }
+    }
+    
+    func leaveTeam(groupId:String,onCompletion:@escaping(Result<Void,DomainError>)->()){
+        self.fetchMember { result in
+            switch result{
+            case .success(let member):
+                
+                let memberId = member.id
+                
+                self.fetchTeam(id: groupId) { result in
+                    switch result{
+                    case .success(let team ):
+                        var teamIds = team.teamMemberIDS
+                        var teamNames = team.teamMemberNames
+                        var teamRoles = team.teamMemberRoles
+                        
+                        var count = 0
+                        for id in teamIds {
+                            if id == memberId {
+                                teamIds.remove(at: count)
+                                teamNames.remove(at: count)
+                                teamRoles.remove(at: count)
+                                break
+                            }
+                            count += 1
+                        }
+                        teamIds = teamIds.filter({!$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty})
+                        teamNames = teamNames.filter({!$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty})
+                        teamRoles = teamRoles.filter({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty})
+                        
+                        self.db.collection("group_v2").document(groupId).updateData([
+                        
+                            "teamMemberIDS" : teamIds,
+                            "teamMemberNames" : teamNames ,
+                            "teamMemberRoles" : teamRoles
+                        ])
+                        self.db.collection("users_v2").document(self.userId!).updateData([
+                            "groupId" : ""
+                        ])
+                        onCompletion(.success(()))
+                        return
+                    case .failure(let error):
+                        print("error fetching member \(error)")
+                        return
+                    }
+                }
+            case .failure(let error):
+                print("error fetching member \(error)")
+                return
+            }
+        }
+    }
+    
+    func fetchAllianceRSVPS(alliances:[String],onCompletion:@escaping(Result<[RSVPTeam],DomainError>)->()){
+        
+        var count = 0
+        var maxCount = alliances.count
+        var rsvpTeam : [RSVPTeam] = []
+        
+        if maxCount == 0 {
+            onCompletion(.success([]))
+            return
+        }
+        
+        for alliance in alliances {
+            db.collection("group_v2").document(alliance).getDocument { document, error in
+                guard let document = document , error == nil else {
+                    count += 1
+                    return
+                }
+                let teamName = document.get("teamName") as! String
+                let teamId = document.get("id") as! String
+                let rsvps = document.get("rsvps") as! [String]
+                
+                rsvpTeam.append(RSVPTeam(teamName: teamName, teamId: teamId, rsvps: rsvps))
+                
+                count += 1
+                if count == maxCount {
+                    onCompletion(.success(rsvpTeam ))
+                    return
+                }
+                
+            }
+        }
+        
+    }
+    
 
  
     

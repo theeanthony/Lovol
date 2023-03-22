@@ -21,7 +21,7 @@ struct VisitGroupProfile: View {
               }
           }
       }
-    let groupId : String
+    @Binding var groupId : String
     
     @State private var alliances : AllianceModel = AllianceModel(groupId: "",teamName: "", teamDescription: "", memberModel: [], teamPic: UIImage())
     @State private var fetchedMemberModel : [MemberModel] = []

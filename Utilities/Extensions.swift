@@ -159,6 +159,39 @@ extension Date {
     }
     var localizedDescription: String { localizedDescription() }
 }
+extension URL {
+    var isVideoURL: Bool {
+        let videoTypes = ["mp4", "mov", "m4v"]
+        return videoTypes.contains(self.pathExtension.lowercased())
+    }
+}
+extension View {
+    func showLoading(_ isLoading: Bool, progress: Binding<Float>) -> some View {
+        if isLoading {
+            return self.overlay(
+                ZStack {
+                    Color(.systemBackground).opacity(0.3)
+                    
+                    ProgressView(value: progress.wrappedValue)
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color(.white)))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            )
+            .eraseToAnyView()
+        } else {
+            return self.eraseToAnyView()
+        }
+    }
+    
+    func eraseToAnyView() -> AnyView {
+        AnyView(self)
+    }
+}
+
+
+
+
+
 extension Date {
 
     var fullDate: String { localizedDescription(date: .full, time: .none) }

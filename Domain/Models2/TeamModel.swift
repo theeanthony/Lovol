@@ -20,3 +20,10 @@ struct TeamModel {
     var lat: Double?
     
 }
+
+struct RSVPTeam {
+    
+    var teamName : String
+    var teamId : String
+    var rsvps : [String]
+}

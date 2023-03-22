@@ -63,7 +63,7 @@ struct GameShowLabelView: View {
 
                             }
                             .sheet(isPresented: $isPresented) {
-                                ExampleVideoView(player: AVPlayer(url: URL(string: liveEventInfo.videoURL!)!), isPresented: $isPresented)
+                                ExampleVideoView(player: AVPlayer(url: URL(string: liveEventInfo.videoURL!)!))
                                 
                                     .presentationDetents([.large])
 

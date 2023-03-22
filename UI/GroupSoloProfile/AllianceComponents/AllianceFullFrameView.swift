@@ -21,7 +21,7 @@ struct AllianceFullFrameView: View {
               }
           }
       }
-    let alliance : AllianceModel
+    @Binding var alliance : AllianceModel
     
     @State private var alliances : AllianceModel = AllianceModel(groupId: "",teamName: "", teamDescription: "", memberModel: [], teamPic: UIImage())
     @State private var fetchedMemberModel : [MemberModel] = []
@@ -33,7 +33,21 @@ struct AllianceFullFrameView: View {
             
             VStack{
                 if loading {
-                    ProgressView()
+                    
+                    if error {
+                        Text("Error loading this profile.").font(.custom("Rubik Regular", size: 13)).foregroundColor(.white)
+                    }else{
+                        Spacer()
+                        
+                        HStack{
+                            Spacer()
+                            ProgressView()
+                            Spacer()
+
+                        }
+                        Spacer()
+
+                    }
                     
                 }else{
                 ScrollView{
@@ -167,6 +181,8 @@ struct AllianceFullFrameView: View {
                                     presentationMode.wrappedValue.dismiss()
                                 } label: {
                                     Image(systemName:"xmark").foregroundColor(.white)
+                                        .padding(5)
+                                        .background(Circle().fill(AppColor.lovolDark.opacity(0.6)))
                                 }
 
                                 Spacer()
@@ -183,6 +199,12 @@ struct AllianceFullFrameView: View {
         self.alliances = alliance
         print("before fetching \(alliance.memberModel)")
 
+        
+        if alliance.groupId == "" {
+            self.error = true 
+            
+            return
+        }
         profileViewModel.fetchMainPictureV1(members: alliance.memberModel) { result in
             switch result {
             case .success(let members):

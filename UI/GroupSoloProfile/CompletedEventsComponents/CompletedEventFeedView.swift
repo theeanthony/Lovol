@@ -29,7 +29,7 @@ struct CompletedEventFeedView: View {
                   
               }
           }
-      }
+      } 
     @State private var readToEnd = false
         @State private var scrollViewHeight = CGFloat.infinity
 
@@ -47,108 +47,89 @@ struct CompletedEventFeedView: View {
     var body: some View {
         GeometryReader{geo in
 
-   
-        VStack{
-            if loading {
-                ProgressView()
-            }else{
-                FilterButtons(allEvents:templatePhotos , events: $photos)
-                    .frame(height:geo.size.height * 0.15)
-                ExDivider(color:.gray)
+//            NavigationView{
                 VStack{
-                    ScrollView{
-                        HStack{
-                            VStack(spacing:0){
-                                if !photos.isEmpty {
-                          
-                                    ForEach(Array(stride(from: 0, to: self.photos.count, by: 3)), id: \.self) { index in
-                                        HStack(spacing:0){
-                                            
-                                            
-                                            //
-                                            
-                                            CompleteImagePost(completedEvent: photos[index])
-                                                .frame(width:geo.size.width * 0.315)
-//                                                .onTapGesture {
-//                                                    fill(chosen:photos[index].photoURLS[)
-//
-//
-//                                                }
-//                                                .padding(1)
-                                            //                                            Spacer()
-                                            
-                                            if(index + 1 < photos.count){
-                                                //                                                    self.chosenEvent = photos[index + 1].photoURLS
-                                                
-                                                CompleteImagePost(completedEvent: photos[index+1])
-                                                    .frame(width:geo.size.width * 0.315)//                                                    .onTapGesture {
-//                                                        fill(chosen:photos[index + 1].photoURLS)
-//
-//
-//                                                    }
-//                                                    .padding(1)
-
-                                                //                                                Spacer()
-                                                
-                                                
-                                            }
-                                            
-                                            if(index + 2 < photos.count){
-                                                //                                                    self.chosenEvent = photos[index + 2].photoURLS
-                                                
-                                                CompleteImagePost(completedEvent: photos[index+2])
-                                                    .frame(width:geo.size.width * 0.315)
-//                                                    .onTapGesture {
-//
-//                                                        fill(chosen:photos[index + 2].photoURLS)
-//
-//
-//                                                    }
-//                                                    .padding(1)
-
-                                                //                                                Spacer()
-                                                
-                                                
-                                            }
-                                            Spacer()
-                                        }
-                                        .frame(width:geo.size.width * 0.99, height:geo.size.height * 0.19)
-                                        .padding(.leading,10)
-                                
-                                }
-                                }else{
-                                    Text("No Photos") .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
-
-                                }
-
+                    if loading {
+                        VStack{
+                            Spacer()
+                            HStack{
+                                Spacer()
+                                ProgressView()
+                                Spacer()
                             }
-                            .frame(width:geo.size.width * 0.99)
+                            Spacer()
                         }
-                   
+                        .background(AppColor.lovolDark)
+                    }else{
+             
+                        ExDivider(color:.white)
+                        VStack{
+                            ScrollView{
+                                HStack{
+                                    VStack(spacing:0){
+                                        if !photos.isEmpty {
+                                            
+                                            ForEach(Array(stride(from: 0, to: self.photos.count, by: 3)), id: \.self) { index in
+                                                HStack(spacing:0){
+                                          
+                                                    CompleteImagePost(completedEvent: photos[index], fromProfile: true)
+                                                        .frame(width:geo.size.width * 0.315)
+                                           
+                                                    
+                                                    if(index + 1 < photos.count){
+                                             
+                                                        
+                                                        CompleteImagePost(completedEvent: photos[index+1], fromProfile: true)
+                                                            .frame(width:geo.size.width * 0.315)//
+
+                                                    }
+                                                    
+                                                    if(index + 2 < photos.count){
+                                            
+                                                        CompleteImagePost(completedEvent: photos[index+2], fromProfile: true)
+                                                            .frame(width:geo.size.width * 0.315)
+
+                                     
+                                                        
+                                                    }
+                                                    Spacer()
+                                                }
+                                                .frame(width:geo.size.width * 0.99, height:geo.size.height * 0.19)
+                                                .padding(.leading,10)
+                                                
+                                            }
+                                        }else{
+                                            Text("No Photos") .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
+                                            
+                                        }
+                                        
+                                    }
+                                    .frame(width:geo.size.width * 0.99)
+                                }
+                                
+                            }
+                            .frame(width:geo.size.width, height:geo.size.height * 0.8)
+                            
+                            .background(
+                                GeometryReader { proxy in
+                                    Color.clear
+                                        .onChange(of: proxy.size, perform: { newSize in
+                                            let _ = print("ScrollView: ", newSize)
+                                            scrollViewHeight = newSize.height
+                                        })
+                                }
+                            )
+                            .coordinateSpace(name: scrollViewNameSpace)
+                        }.frame(height:geo.size.height * 0.85)
                     }
-                    .frame(width:geo.size.width, height:geo.size.height * 0.8)
+                }
 
-                    .background(
-                        GeometryReader { proxy in
-                            Color.clear
-                                .onChange(of: proxy.size, perform: { newSize in
-                                    let _ = print("ScrollView: ", newSize)
-                                    scrollViewHeight = newSize.height
-                                })
-                        }
-                    )
-                    .coordinateSpace(name: scrollViewNameSpace)
-                }.frame(height:geo.size.height * 0.85)
-            }
-   
-
-        }
+//        }
         .onAppear(perform: onAppear)
         .frame(height:geo.size.height )
-        .fullScreenCover(isPresented: $isPresent) {
-            EnlargedPhotoView(image: $chosenEvent)
-             }
-        .frame(maxWidth:.infinity,maxHeight:.infinity)
+
+            
+//        .frame(maxWidth:.infinity,maxHeight:.infinity)
         .background(BackgroundView())
 
             

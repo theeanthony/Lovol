@@ -38,7 +38,7 @@ struct PublicSheet: View {
             }
             Spacer()
         }
-        .background(AppColor.lovolDarkerPurpleBackground)
+        .background(AppColor.lovolDark)
 
     }
 }

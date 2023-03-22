@@ -10,7 +10,8 @@ import SwiftUI
 
 struct HostEvent{
     
-    let hostId : String 
+    let hostId : String
+    let hostName:String
     let eventId : String
     let eventName : String
     let eventDescription: String
@@ -27,7 +28,7 @@ struct HostEvent{
     let eventTags : [String]
     let exclusivity : Int
     let eventFee : String
-    let over21 : Bool
+//    let over21 : Bool
         
     var photoURL : String
     let note : String
@@ -50,6 +51,7 @@ struct HostEvent{
 extension HostEvent: Codable {
     enum CodingKeys: String, CodingKey{
         case hostId
+        case hostName
         case eventId
         case eventName
         case eventDescription
@@ -65,7 +67,7 @@ extension HostEvent: Codable {
         case eventTags
         case exclusivity
         case eventFee
-        case over21
+//        case over21
         case photoURL
         case note
         case isActive

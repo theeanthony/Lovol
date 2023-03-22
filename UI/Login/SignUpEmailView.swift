@@ -55,7 +55,7 @@ struct SignUpEmailView: View {
                                 .padding()
                                 .font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
                                 .background(RoundedRectangle(cornerRadius: 10).fill(AppColor.lovolPinkish)  .opacity(0.3))
-                              
+                            
                         }
                         
                         
@@ -125,6 +125,7 @@ struct SignUpEmailView: View {
                         .textContentType(.password)
                         
                     }
+                    
                     Button(action: {
                         createAccount()
                     }, label: {
@@ -145,6 +146,36 @@ struct SignUpEmailView: View {
                     }
                     .padding(.top)
                     
+                }
+                .frame(width:geo.size.width * 0.9)
+
+                Group{
+//
+                    
+                    HStack{
+                        Rectangle().fill(.white).frame(width:geo.size.width * 0.4,height:1)
+                        Text("Or")
+                            .font(.custom("Rubik Bold", size: 12)).foregroundColor(.white).opacity(0.6)
+                        Rectangle().fill(.white).frame(width:geo.size.width * 0.4,height:1)
+
+
+                    }
+                    .padding(.top)
+//                    .frame(width:geo.size.width 0.9)
+                    
+                    
+                    Button(action: signUpWithApple) {
+                        HStack{
+                            Image(systemName:"applelogo").foregroundColor(.white)
+                            Text("Continue with Apple")
+                               
+                        }
+                    }
+                    .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
+                    .padding(.vertical)
+                    .frame(width:geo.size.width * 0.9)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(AppColor.lovolPinkish))
+                    .padding(.top)
                 }
                 .frame(width:geo.size.width * 0.9)
 
@@ -184,6 +215,9 @@ struct SignUpEmailView: View {
                 
 
 
+    }
+    private func signUpWithApple(){
+        authViewModel.signUpWithApple()
     }
     private func dismissView(){
         dismiss()

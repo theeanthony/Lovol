@@ -10,8 +10,7 @@ import SwiftUI
 struct StoreHeaderView: View {
     @EnvironmentObject private var profileViewModel : ProfilesViewModel
     let groupId : String
-    @State private var amountOfTokens : Int = 3
-    @State private var tokens : Tokens = Tokens()
+    @Binding var tokens : Tokens 
     
     @Binding var cantPurchaseLovols : Bool
     
@@ -34,7 +33,7 @@ struct StoreHeaderView: View {
                             })
                     Text("\(tokens.multiplier)")
                         .font(.custom("Rubik Bold", size: 32)).foregroundColor(.white)
-
+ 
                     Spacer()
                     Image("resurrection")
                         .resizable()
@@ -94,10 +93,10 @@ struct StoreHeaderView: View {
 
 struct Tokens {
     
-    let lovols : Int
-    let multiplier : Int
-    let resurrection: Int
-    let lovolBits : Int
+    var lovols : Int
+    var multiplier : Int
+    var resurrection: Int
+    var lovolBits : Int
     
     init(){
         self.lovols = 0

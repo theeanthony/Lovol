@@ -73,7 +73,7 @@ struct NewEventsListView: View {
                                    
 
                                     }.fullScreenCover(isPresented: $isPresented) {
-                                       NewEventInformationView(event:$chosenEvent)
+//                                       NewEventInformationView(event:$chosenEvent)
                                     }
                           
 

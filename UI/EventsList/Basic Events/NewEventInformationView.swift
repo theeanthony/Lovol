@@ -3,7 +3,7 @@
 //  lovol_v2 (iOS)
 //
 //  Created by Anthony Contreras on 1/15/23.
-//
+// 
 
 import SwiftUI
 
@@ -13,7 +13,7 @@ struct NewEventInformationView: View {
     @EnvironmentObject private var eventViewModel : EventViewModel
     
     @EnvironmentObject private var profileViewModel : ProfilesViewModel
-    
+    let inGroupError: Bool
      @Binding var event : EventModel
     
     @State private var initialImage : UIImage = UIImage()
@@ -54,10 +54,12 @@ struct NewEventInformationView: View {
     @State private var cannotSubmitError : Bool = false
     
     @State private var cannotSubmit : Bool = true
+    
+    @State private var showInGroupError : Bool = false
 
     
     var body: some View {
-      
+       
         
         GeometryReader { geo in
 
@@ -70,7 +72,7 @@ struct NewEventInformationView: View {
                             
                             VStack{
                                 HStack{
-                                    HeaderView(name: event.eventName,event:event)
+                                    HeaderView(inGroupError:inGroupError,name: event.eventName,event:$event)
                                     
                                     
                                     
@@ -79,49 +81,29 @@ struct NewEventInformationView: View {
                                 
                                 Section(header:ListHeader(text:"Description")){
                                     BodyView(description: event.eventDescription, tanOrNo: true)
-                                        .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
+//                                        .frame(maxWidth: geo.size.width * 9, minHeight:100)
                                 }
-                                .frame(width:geo.size.width * 0.9)
-                                
-                                
-                                
-                                //                            if !event.lastReview.isEmpty{
-                                //                                HStack{
-                                //                                    Text("See What Friends Are Saying...")
-                                //                                        .font(.custom("Rubik Bold", size: 16)).foregroundColor(.white)
-                                //                                    Spacer()
-                                //                                    Image(systemName:"chevron.right")
-                                //
-                                //                                }
-                                //
-                                //                                .frame(width:geo.size.width * 0.9,height:geo.size.height * 0.05)
-                                //                                .padding(.top,10)
-                                //                                ReviewsView(event:event)
-                                //                                    .frame(width:geo.size.width * 0.9, height:geo.size.height * 0.25)
-                                //                            }
-                                //
-                                //
-                                //                            LeaveReviewView()
-                                //                                .frame(width:geo.size.width * 0.9, height:geo.size.height * 0.15)
-                                //                                .padding(.vertical,5)
-                                
-                                Section(header:ListHeader(text: "Rules")){
-                                    BodyView(description: event.eventRules, tanOrNo: false)
-                                        .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
-                                        .padding(.vertical,10)
-                                }
-                                .frame(maxWidth: geo.size.width * 0.95)
+                                .frame(width:geo.size.width * 0.95)
+         
+                                    Section(header:ListHeader(text: "Rules")){
+                                        BodyView(description: event.eventRules, tanOrNo: false)
+                                        //                                        .frame(maxWidth: geo.size.width * 9)
+                                            .padding(.vertical,10)
+                                    }
+                                    .frame(maxWidth: geo.size.width * 0.95)
+//                                }
                                 
                                 
                                 //                                .frame(width:geo.size.width)
                                 
-                                
-                                Section(header:ListHeader(text: "Tips")){
-                                    BodyView(description: event.eventTips, tanOrNo: true)
-                                        .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
-                                        .padding(.vertical,10)
+                                if !event.eventTips.isEmpty {
+                                    Section(header:ListHeader(text: "Tips")){
+                                        BodyView(description: event.eventTips, tanOrNo: true)
+                                        //                                        .frame(maxWidth: geo.size.width * 9, minHeight:100)
+                                            .padding(.vertical,10)
+                                    }
+                                    .frame(maxWidth: geo.size.width * 0.95)
                                 }
-                                .frame(maxWidth: geo.size.width * 0.95)
                                 
                                 //                                .frame(width:geo.size.width)
                                 
@@ -133,7 +115,7 @@ struct NewEventInformationView: View {
                                 if !event.eventOfferings.isEmpty{
                                     Section(header:ListHeader(text: "Offerings")){
                                         BodyView(description: event.eventOfferings, tanOrNo: true)
-                                            .frame(maxWidth: geo.size.width * 9, minHeight:100, maxHeight: 500)
+//                                            .frame(maxWidth: geo.size.width * 9, minHeight:100)
                                             .padding(.vertical,10)
                                     }
                                     .frame(maxWidth: geo.size.width * 0.95)
@@ -162,31 +144,43 @@ struct NewEventInformationView: View {
 //                    }
                     
                 }
-                Button {
+                
+                
+                if event.isTempEvent && event.endingTime != nil && event.endingTime! < Date(){
                     
-                    if cannotSubmit{
-                        self.alreadySubmittedEvent = true 
-                    }else{
-                        submitPhotoButtonPressed = true
-
-                    }
-
-                } label: {
-                    VStack{
-                        Rectangle().fill(AppColor.lovolPinkish)
-                            .frame(width:geo.size.width , height:80)
-                            .overlay(
-                                VStack{
-                                    Spacer()
-                                    
-                                    Text( uploadedImage == initialImage ? "Take Photo" : "Submit Photo") .font(.custom("Rubik Regular", size: 16)).foregroundColor(.white)
-                                    Spacer()
-                                }
-                                
-                            )
-                    }
-
+                    
                 }
+                else{
+                    Button {
+                        if inGroupError{
+                            self.showInGroupError = true
+                        }
+                        else if cannotSubmit{
+                            self.alreadySubmittedEvent = true
+                        }else{
+                            submitPhotoButtonPressed = true
+
+                        }
+
+                    } label: {
+                        VStack{
+                            Rectangle().fill(AppColor.lovolPinkish)
+                                .frame(width:geo.size.width , height:80)
+                                .overlay(
+                                    VStack{
+                                        Spacer()
+                                        
+                                        Text( uploadedImage == initialImage ? "Take Photo" : "Submit Photo") .font(.custom("Rubik Regular", size: 16)).foregroundColor(.white)
+                                        Spacer()
+                                    }
+                                    
+                                )
+                        }
+
+                    }
+           
+                }
+
 
             }
             .overlay(
@@ -197,66 +191,72 @@ struct NewEventInformationView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "xmark") // set image here
-                                    .resizable()
-                                    .frame(width:geo.size.width * 0.07 , height:geo.size.width * 0.07)
-                                .aspectRatio(contentMode: .fit)
+//                                    .resizable()
+//                                    .frame(width:geo.size.width * 0.07 , height:geo.size.width * 0.07)
+//                                .aspectRatio(contentMode: .fit)
                                 .foregroundColor(.white)
+                                .padding()
+                                .background(Circle().fill(AppColor.lovolDark)).opacity(0.6)
                                 
                             }
+//                            .padding()
+//                            .background(Circle().fill(AppColor.lovolDark)).opacity(0.6)
                         }
                         Spacer()
 
                     }
+                    .padding(.top)
+                    .padding(.top)
                     Spacer()
-                    if uploadedImage != initialImage {
-                            HStack{
+//                    if uploadedImage != initialImage {
+//                            HStack{
+////                                VStack{
+//                                    Button(action: {
+//                                        showImagePicker.toggle()
+//                                    }, label: {
+//                                        Image(uiImage: uploadedImage)
+//                                            .resizable()
+//                                            .centerCropped()
+//                                            .frame(width: geo.size.width * 0.3, height: geo.size.width * 0.3)
+//                                            .aspectRatio(contentMode: .fill)
+//                                            .clipShape(Circle())
+//                                            .overlay(
+//                                                Circle().stroke(.black,lineWidth:2)
+//                                            )
+//                                    })
 //                                VStack{
-                                    Button(action: {
-                                        showImagePicker.toggle()
-                                    }, label: {
-                                        Image(uiImage: uploadedImage)
-                                            .resizable()
-                                            .centerCropped()
-                                            .frame(width: geo.size.width * 0.3, height: geo.size.width * 0.3)
-                                            .aspectRatio(contentMode: .fill)
-                                            .clipShape(Circle())
-                                            .overlay(
-                                                Circle().stroke(.black,lineWidth:2)
-                                            )
-                                    })
-                                VStack{
-                                    HStack{
-                                        Circle().fill(AppColor.strongRed).frame(width:20,height:20)
-                                            .overlay(Text("2x")
-                                                .font(.custom("Rubik Bold", size: 10)).foregroundColor(.white)
-)
-                                        Text("Use 1")
-                                            .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
-
-                                        Toggle("", isOn: $useDoubler)
-                                            .toggleStyle(SwitchToggleStyle())
-                                            .tint(AppColor.lovolPinkish)
-                                            .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
-                                    }
-                                    HStack{
-                                        Toggle("Global Feed", isOn: $isGlobal)
-                                            .toggleStyle(SwitchToggleStyle())
-                                            .tint(AppColor.lovolPinkish)
-                                            .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
-                                    }
-                               
-                                }
-                                .padding(10)
-                                .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolDarkerPurpleBackground))
-                                Spacer()
-
-                            }
-                            .padding(.bottom,50)
-//                                                         Spacer()
-
-                    }
-                }
-                    .frame(width: geo.size.width * 0.8, height: geo.size.height)
+//                                    HStack{
+//                                        Circle().fill(AppColor.strongRed).frame(width:20,height:20)
+//                                            .overlay(Text("2x")
+//                                                .font(.custom("Rubik Bold", size: 10)).foregroundColor(.white)
+//)
+//                                        Text("Use 1")
+//                                            .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
+//
+//                                        Toggle("", isOn: $useDoubler)
+//                                            .toggleStyle(SwitchToggleStyle())
+//                                            .tint(AppColor.lovolPinkish)
+//                                            .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
+//                                    }
+//                                    HStack{
+//                                        Toggle("Global Feed", isOn: $isGlobal)
+//                                            .toggleStyle(SwitchToggleStyle())
+//                                            .tint(AppColor.lovolPinkish)
+//                                            .font(.custom("Rubik Bold", size: 14)).foregroundColor(.white)
+//                                    }
+//
+//                                }
+//                                .padding(10)
+//                                .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolDarkerPurpleBackground))
+//                                Spacer()
+//
+//                            }
+//                            .padding(.bottom,50)
+////                                                         Spacer()
+//
+//                    }
+                }.padding()
+//                    .frame(width: geo.size.width * 0.8, height: geo.size.height)
 
             
             )
@@ -292,6 +292,11 @@ struct NewEventInformationView: View {
                     })
                 })
                 .alert("There is a network issue validating if you have completed this event. Please try to submit later if you have not already.", isPresented: $cannotSubmitError, actions: {
+                    Button("OK", role: .cancel, action: {
+    
+                    })
+                })
+                .alert("Join or create a team to submit an event.", isPresented: $showInGroupError, actions: {
                     Button("OK", role: .cancel, action: {
     
                     })
@@ -374,7 +379,7 @@ struct BodyView: View{
     let description : String
     let tanOrNo : Bool
     var body: some View{
-        GeometryReader{geo in
+//        GeometryReader{geo in
             HStack{
                 Spacer()
                 VStack{
@@ -382,9 +387,10 @@ struct BodyView: View{
                     
                         .font(.custom("Rubik Regular", size: 14))
                     
-                        .frame(maxWidth:geo.size.width * 0.85, minHeight: 50, maxHeight: 450)
+//                        .frame(maxWidth:geo.size.width * 0.85, minHeight: 50)
                 }
-                .frame(maxWidth:geo.size.width * 0.9, minHeight: 50, maxHeight:500)
+//                .frame(maxWidth:geo.size.width * 0.9, minHeight: 50)
+                .padding()
                 .background(tanOrNo ? RoundedRectangle(cornerRadius: 10).fill(.clear) : RoundedRectangle(cornerRadius: 10).fill(AppColor.lovolPinkish))
                 .foregroundColor(.white)
                 Spacer()
@@ -392,7 +398,7 @@ struct BodyView: View{
             }
 
    
-        }
+//        }
     }
 }
 struct BigLabelView: View{

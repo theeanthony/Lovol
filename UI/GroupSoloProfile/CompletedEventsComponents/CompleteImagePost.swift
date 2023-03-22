@@ -28,10 +28,13 @@ struct CompleteImagePost: View {
     @State private var visitProfile : Bool = false
     
     @State private var visitComments : Bool = false
-    
+//    @State private var isCaptionExpanded = false
+
     @State private var photoIndex : Int = 0
     
     @State private var showBigVersion : Bool = false
+    
+    var fromProfile : Bool
     
     var body: some View {
         GeometryReader { geo in
@@ -72,30 +75,47 @@ struct CompleteImagePost: View {
                 
                     .fullScreenCover(isPresented: $showBigVersion) {
                         VStack{
-                            Spacer()
-                            ImagePost(completedEvent: completedEvent,isOverlayShowing:false)
-                                .frame(height:geo.size.height * 5)
-                            Spacer()
-          
+                            HStack{
+                                Button {
+                                    showBigVersion = false
+                                } label: {
+                                    Image(systemName:"xmark").foregroundColor(.white)
+
+                                }.padding()
+
+                                Spacer()
+                            }
+                            .padding(.bottom,5 )
+                            ScrollView{
+                                Spacer()
+                                ImagePost(completedEvent: completedEvent,isOverlayShowing:true, fromProfile: fromProfile)
+                                    .frame(height:geo.size.height * 5)
+                                    .padding(.top, fromProfile ? 10 : 0)
+
+                                VStack(alignment: .leading, spacing: 5) {
+                                    HStack{
+                                        Text(completedEvent.caption)
+                                            .font(.custom("Rubik Regular", size: 14))
+                                            .foregroundColor(.white)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        //                                    .lineLimit(isCaptionExpanded.wrappedValue ? nil : 2)
+                                            .padding(.horizontal, 10)
+                                        
+                                        Spacer()
+                                        
+                                    }
+                                }
+                                .padding(.top, fromProfile ? 5 : -30)
+                                Spacer()
+                                
+                            }
+//                            .padding(.top,10)
+
+                            
+
                         }
                         .background(AppColor.lovolDark)
 
-                        .overlay(
-                            VStack{
-                                HStack{
-                                    Button {
-                                        showBigVersion = false
-                                    } label: {
-                                        Image(systemName:"xmark").foregroundColor(.white)
-
-                                    }
-
-                                    Spacer()
-                                }
-                                Spacer()
-                            }
-                                .padding()
-                        )
     
                     }
 

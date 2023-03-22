@@ -14,7 +14,6 @@ struct ExampleVideoView: View {
 //    @State private var selectedVideo: Video?
 //    let player = AVPlayer (url: URL(string: "https://joy1.videvo.net/videvo_files/video/free/2014-12/large_watermarked/videvostock009_preview.mp4")!)
     let player : AVPlayer
-    @Binding var isPresented: Bool
     var body: some View {
         
             VStack{
@@ -54,11 +53,11 @@ struct ExampleVideoView: View {
     
 }
 
-struct ExampleVideoView_Previews: PreviewProvider {
-    
-    @State static var isPresented : Bool = false
-    static var previews: some View {
-        ExampleVideoView(player: AVPlayer (url: URL(string: "https://joy1.videvo.net/videvo_files/video/free/2014-12/large_watermarked/videvostock009_preview.mp4")!), isPresented: $isPresented)
-    }
-    
-}
+//struct ExampleVideoView_Previews: PreviewProvider {
+//    
+//    @State static var isPresented : Bool = false
+//    static var previews: some View {
+//        ExampleVideoView(player: AVPlayer (url: URL(string: "https://joy1.videvo.net/videvo_files/video/free/2014-12/large_watermarked/videvostock009_preview.mp4")!), isPresented: $isPresented)
+//    }
+//    
+//}

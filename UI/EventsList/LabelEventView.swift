@@ -9,7 +9,8 @@ import SwiftUI
 
 struct LabelEventView: View {
     
-    let events : [EventModel]
+    let inGroupError:Bool
+    @Binding var events : [EventModel]
     
 //    @State private var enterEvents : [EventModel] = []
     @EnvironmentObject private var eventViewModel : EventViewModel
@@ -30,6 +31,8 @@ struct LabelEventView: View {
     @State private var showTeamsGoing : Bool = false
     @State private var chosenSet : [String] = []
     
+    @State private var chosenIndex : Int = 0
+    
     @State private var eventSaved : Bool = false
     
     @State private var alterableEvents : [EventModel] = []
@@ -44,34 +47,39 @@ struct LabelEventView: View {
                     ScrollView(.horizontal){
                       
                             HStack{
-                                ForEach(alterableEvents.indices, id:\.self) { event in
+                                ForEach(events.indices, id:\.self) { event in
                                     
-//                                    if event.indices == 6 {
-//                                        Button {
+                                    if event == 6 {
+                                        Button {
+
+                                        } label: {
+                                            
+                                            NavigationLink(destination:IndividualLabelEventView(inGroupError:inGroupError,events: $events , heder:heder,locationSet:locationSet,long:long,lat:lat) ) {
+                                                VStack{
+                                                    Image(systemName:"chevron.right")
+                                                    Text("More Events")
+                                                }
+                                                .font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+                                                .frame(width:geo.size.width * 0.2, height:geo.size.width * 0.2)
+                                                .background(RoundedRectangle(cornerRadius:20).fill(AppColor.lovolDarkerPurpleBackground).opacity(0.7))
+                                                .padding(.trailing,5)
+                                            }
+                                 
+                                        }
 //
-//                                        } label: {
-//                                            VStack{
-//                                                Image(systemName:"chevron.right")
-//                                                Text("More Events")
-//                                            }
-//                                            .frame(width:geo.size.width * 0.2, height:geo.size.width * 0.2)
-//                                            .background(RoundedRectangle(cornerRadius:20).fill(AppColor.lovolDarkerPurpleBackground).opacity(0.7))
-//                                        }
-//                                        break
-//
-//
-//                                    }
-//                                    else{
+
+                                    }
+                                    else if event < 6{
                                     
                                     
                                     Button {
-                                        fillEvent(event: alterableEvents[event])
+                                        fillEvent(event: events[event],index:event)
                                     } label: {
                                             
                                             VStack{
                                             
                                                 ZStack{
-                                                    AsyncImage(url: URL(string: alterableEvents[event].eventURL),
+                                                    AsyncImage(url: URL(string: events[event].eventURL),
                                                                content: { image in
                                                         image.resizable()
                                                         
@@ -102,9 +110,9 @@ struct LabelEventView: View {
                                                         HStack{
                                                             Spacer()
                                                             Button {
-                                                                saveEvent(event: alterableEvents[event], id: event)
+                                                                saveEvent(event: events[event], id: event)
                                                             } label: {
-                                                                if alterableEvents[event].didISave!{
+                                                                if events[event].didISave!{
                                                                     Image(systemName:"heart.fill")
                                                                         .foregroundColor(.red)
                                                                 }else{
@@ -123,36 +131,36 @@ struct LabelEventView: View {
                                                     Spacer()
                                                     VStack{
                                                         HStack{
-                                                            Text(alterableEvents[event].eventName)
+                                                            Text(events[event].eventName)
                                                             Spacer()
                                                             HStack{
                                                                 Image("lovol.currency")
-                                                                Text("\(alterableEvents[event].eventPoints)")
+                                                                Text("\(events[event].eventPoints)")
                                                             }
                                                             HStack{
                                                                 Image(systemName:"clock.fill")
-                                                                Text("\(alterableEvents[event].eventTime)")
+                                                                Text("\(events[event].eventTime)")
                                                             }
                                                         }
                                                         .padding(.vertical,0.8)
-                                                        if alterableEvents[event].isTempEvent{
+                                                        if events[event].isTempEvent{
                                                             VStack{
                                                                 HStack{
-                                                                    Text("\(alterableEvents[event].startingTime!.shortTime) \(alterableEvents[event].startingTime!.fullDate)")
+                                                                    Text("\(events[event].startingTime!.shortTime) \(events[event].startingTime!.fullDate)")
                                                                     Spacer()
                                                                 }
                                                                 HStack{
                                                                     Button {
                                                                       
-                                                                        RSVPEvent(event:alterableEvents[event])
+                                                                        RSVPEvent(event:events[event])
                                                                         
                                                                     } label: {
-                                                                        Text("RSVPS (\(alterableEvents[event].totalRSVP!))")
+                                                                        Text("RSVPS (\(events[event].totalRSVP!))")
                                                                             .padding(5)
                                                                             .background(RoundedRectangle(cornerRadius:10).fill( LinearGradient(gradient: Gradient(colors: [ AppColor.lovolPinkish,AppColor.lovolNamePink]), startPoint: .top, endPoint: .bottom)))
                                                                         
                                                                     }
-                                                                    if alterableEvents[event].didIRSVP ?? false{
+                                                                    if events[event].didIRSVP ?? false{
                                                                         Image(systemName:"checkmark")
                                                                     }
                                                                     
@@ -174,28 +182,38 @@ struct LabelEventView: View {
                                                             VStack{
                                                                 HStack{
                                                                     
-                                                                    if alterableEvents[event].eventLocation {
+                                                                    if events[event].eventLocation {
                                                                         Image(systemName:"mappin")
                                                                             .foregroundColor(.white)
-                                                                        Text(" \(String(format: "%.1f%",alterableEvents[event].distance!)) miles")
+                                                                        Text(" \(String(format: "%.1f%",events[event].distance!)) miles")
                                                                         Spacer()
 
                                                                     }
-                                                                    else if alterableEvents[event].eventType == "Home"{
+                                                                    else if events[event].eventType == "Home"{
                                                                         Image(systemName:"house.fill")
                                                                             .foregroundColor(.white)
 
                                                                         Text("Home")
                                                                         Spacer()
                                                                     }
+                                                                    else if events[event].eventType == "Local"{
+                                                                        Image(systemName:"globe.americas").foregroundColor(.white)
+                                                                        Text("Local")
+                                                                        Spacer()
+                                                                    }
+                                                                    else if events[event].eventType == "Adult"{
+                                                                        Image(systemName:"eyes.inverse").foregroundColor(.white)
+                                                                        Text("Fun")
+                                                                        Spacer()
+                                                                    }
                                                                    
                                                                 }
                                                                 .padding(.bottom,5)
                                                                 HStack{
-                                                                    Text(String(format: "%.1f%", alterableEvents[event].eventTotalReviews != 0 ? alterableEvents[event].eventReviewPercentage / Double(alterableEvents[event].eventTotalReviews) : 0.0))
+                                                                    Text(String(format: "%.1f%", events[event].eventTotalReviews != 0 ? events[event].eventReviewPercentage / Double(events[event].eventTotalReviews) : 0.0)).foregroundColor(.white)
                                                                     Image(systemName: "star.fill")
                                                                         .foregroundColor(.yellow)
-                                                                    Text("(\(alterableEvents[event].eventTotalReviews))").opacity(0.7)
+                                                                    Text("(\(events[event].eventTotalReviews))").opacity(0.7)
                                                                     Spacer()
                                                                 }
                                                                 Text("")
@@ -213,13 +231,19 @@ struct LabelEventView: View {
                                             }
                                             .font(.custom("Rubik Regular", size: 14)).foregroundColor(.white)
                                             .background(RoundedRectangle(cornerRadius:10).fill(AppColor.lovolPinkish))
-                                            .padding(.horizontal,2)
+                                            .padding(.horizontal,5)
                                     }
+//                                    .onChange(of: chosenEvent) { newValue in
+                              //                                            print("change")
+                              //                                            events[event] = newValue
+                              //                                        }
                                     .fullScreenCover(isPresented: $isPresented) {
-                                        NewEventInformationView(event:$chosenEvent)
+                                        NewEventInformationView(inGroupError:inGroupError,event:$events[chosenIndex])
                                     }
+                             
+                                  
 
-//                                }
+                                }
                                    
                             }
                         } //hstack above foreach
@@ -240,7 +264,7 @@ struct LabelEventView: View {
                     
                 
             }
-            .onAppear(perform: onAppear)
+//            .onAppear(perform: onAppear)
 
             
             
@@ -253,18 +277,20 @@ struct LabelEventView: View {
 //        self.enterEvents = events
 ////    }
     ///
-    private func onAppear(){
-        
-        self.alterableEvents = events
-    }
+//    private func onAppear(){
+//
+//        self.alterableEvents = events
+//    }
     private func RSVPEvent(event:EventModel){
         self.chosenSet = event.groupIDS ?? []
         print("chosen set \(chosenSet)")
         showTeamsGoing = true
 
     }
-    private func fillEvent(event:EventModel){
+    private func fillEvent(event:EventModel,index:Int){
         self.chosenEvent = event
+        self.chosenIndex = index
+
         isPresented.toggle()
         return
     }
@@ -277,11 +303,11 @@ struct LabelEventView: View {
 //                return
             case .success(true):
 //                eventSetAlreadyError = true
-                self.alterableEvents[id].didISave = true
+                self.events[id].didISave = true
                 return
 
             case .success(false):
-                self.alterableEvents[id].didISave = false
+                self.events[id].didISave = false
                 return
             case .failure(_):
 //                showDownloadError = true

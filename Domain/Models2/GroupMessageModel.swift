@@ -17,6 +17,6 @@ struct GroupMessageModel: Identifiable, Equatable {
     let individualId : String 
     
     static func from(id: String, _ msg: FirestoreMessage, currentUserId: String, name: String) -> MessageModel{
-        return MessageModel(id: id, isCurrentUser: msg.senderId == currentUserId, timestamp: msg.timestamp, message: msg.message, name: msg.senderName)
+        return MessageModel(id: id, isCurrentUser: msg.senderId == currentUserId, timestamp: msg.timestamp, message: msg.message, name: msg.senderName, senderId: msg.senderId)
     }
 }

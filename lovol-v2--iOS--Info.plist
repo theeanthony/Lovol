@@ -54,11 +54,31 @@
 				<string>request</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Bundle Id</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>lovol.page.link</string>
+			</array>
+		</dict>
 	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
+	<key>FirebaseDynamicLinksCustomDomains</key>
+	<array>
+		<string>lovol.page.link/invite</string>
+		<string>lovol.page.link</string>
+		<string>lovol.page.link/test1</string>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>NSUserActivityTypeBrowsingWeb</string>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Rubik-Italic-VariableFont_wght.ttf</string>

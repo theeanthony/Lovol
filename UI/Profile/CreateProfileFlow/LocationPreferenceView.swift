@@ -163,7 +163,7 @@ struct LocationPreferenceView: View {
                                         Text("Save Address")
                                             .padding()
                                             .frame(width:geo.size.width * 0.7)
-                                            .background(RoundedRectangle(cornerRadius: 20).fill(AppColor.lovolDarkerPurpleBackground))
+                                            .background(RoundedRectangle(cornerRadius: 20).fill(AppColor.lovolPinkish))
                                     }
 
                                 }
@@ -195,7 +195,11 @@ struct LocationPreferenceView: View {
             )
             .ignoresSafeArea(.keyboard)
             .showLoading(loading)
+            .alert("Join or create a team to save your address and to see events happening near you.", isPresented: $notInGroup, actions: {
+                Button("OK", role: .cancel, action: {
 
+                })
+            })
 
     }
     private func setAddress(){

@@ -83,7 +83,7 @@ struct SetSuggestionView: View {
             .frame(height:geo.size.height * 0.3)
             .padding(.top,20)
             .fullScreenCover(isPresented: $isPresent) {
-                    NewEventInformationView(event: $event)
+//                    NewEventInformationView(event: $event)
                  }
             
             

@@ -12,7 +12,9 @@ struct GroupMessageView: View {
     let message : MessageModel
     let groupId: String 
     let group : ChatModel
+    @Binding var isPictureLoaded : Bool
     
+    @Binding var personalPFP : UIImage?
     var body: some View {
         VStack(spacing: 0){
             if !message.isCurrentUser {
@@ -25,10 +27,22 @@ struct GroupMessageView: View {
             }
             HStack(alignment: .bottom, spacing: 15) {
                 if !message.isCurrentUser {
-                    Image(uiImage: group.picture)
-                        .centerCropped()
-                        .frame(width: 40, height: 40, alignment: .center)
-                        .cornerRadius(20)
+                    
+                    if isPictureLoaded{
+                        Image(uiImage: personalPFP ?? group.picture)
+                            .centerCropped()
+                            .frame(width: 40, height: 40, alignment: .center)
+                            .cornerRadius(20)
+//                            .overlay(Text(message.senderId).foregroundColor(.white))
+                    }else{
+                        Image(uiImage: personalPFP ?? group.picture)
+                            .centerCropped()
+                            .frame(width: 40, height: 40, alignment: .center)
+                            .cornerRadius(20)
+//                            .overlay(Text("false \(message.senderId)").foregroundColor(.white))
+                       
+                    }
+           
                 } else {
                     Spacer()
                 }
@@ -38,6 +52,7 @@ struct GroupMessageView: View {
                     Spacer()
                 }
             }
+    
             
         }
         .font(.custom("Rubik Regular", size: 12))

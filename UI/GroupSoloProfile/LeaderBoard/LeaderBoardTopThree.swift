@@ -23,102 +23,97 @@ struct LeaderBoardTopThree: View {
                     HStack{
                         Spacer()
                         VStack{
-                            Image(uiImage: leaders[2].teamPic)
-                                .resizable()
-                                .centerCropped()
-                                .frame(width: geo.size.width * 0.2, height: geo.size.width * 0.2)
-                                .aspectRatio(contentMode: .fill)
-                                .clipShape(Circle())
-                                .overlay(
-                                    ZStack{
-                                        Circle().stroke(AppColor.lovolDarkerPurpleBackground,lineWidth:4)
-                                        VStack{
-                                            Spacer()
-                                            ZStack{
-                                                Circle().fill(.orange)
-                                                    .frame(width: geo.size.width * 0.1, height: geo.size.width * 0.1)
-                                                Text("3").font(.custom("Rubik Bold", size: 14)).foregroundColor(AppColor.lovolDarkerPurpleBackground
-                                                )
-                                          
-                                            }
-                                            .offset(y:20)
-                                        }
-                                    }
+                      
+                            ZStack{
+                                Image(uiImage: leaders[2].teamPic)
+                                    .resizable()
+                                    .centerCropped()
+                                    .frame(width: geo.size.width * 0.2, height: geo.size.width * 0.2)
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                VStack{
+                                    Image("wolfHat3")
+                                        .resizable()
+                                        .centerCropped()
+                                        .aspectRatio( contentMode: .fit)
+                                        .frame(width: geo.size.width * 0.2, height: geo.size.width * 0.2)
+                                    Spacer()
+
+                                }
+                            }
+        
                                     
-                                    
-                                )
                             VStack{
                                 Text(leaders[2].teamName)
                                     .frame(width: geo.size.width * 0.25)
                                 Text("\(leaders[2].teamPoints)")
                             }
-                            .offset(y:20)
+                            .offset(y:-40)
                             .font(.custom("Rubik Bold", size: 10))
                             .foregroundColor(.white)
                         }
                         Spacer()
                         VStack{
-                            Image(uiImage: leaders[0].teamPic)
-                                .resizable()
-                                .centerCropped()
-                                .frame(width: geo.size.width * 0.35, height: geo.size.width * 0.35)
-                                .aspectRatio(contentMode: .fill)
-                                .clipShape(Circle())
-                                .overlay(
-                                    ZStack{
-                                        Circle().stroke(AppColor.lovolDarkerPurpleBackground,lineWidth:4)
-                                        VStack{
-                                            Spacer()
-                                            ZStack{
-                                                Circle().fill(.yellow)
-                                                    .frame(width: geo.size.width * 0.1, height: geo.size.width * 0.1)
-                                                Text("1").font(.custom("Rubik Bold", size: 14)).foregroundColor(AppColor.lovolDarkerPurpleBackground
-                                                )
-                                           
-                                            }
-                                            .offset(y:20)
-                                        }
-                                    }
-                                )
+                            ZStack{
+                                Image(uiImage: leaders[0].teamPic)
+                                    .resizable()
+                                    .centerCropped()
+                                    .frame(width: geo.size.width * 0.35, height: geo.size.width * 0.35)
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                VStack{
+                                    Image("wolfHat1")
+                                        .resizable()
+                                        .centerCropped()
+                                        .aspectRatio( contentMode: .fit)
+                                        .frame(width: geo.size.width * 0.35, height: geo.size.width * 0.35)
+//                                    Spacer()
+                                        .padding(.top, -geo.size.width * 0.37)
+
+
+                                }
+//                                Spacer()
+                            }
+//                                    .overlay(
+//
+//                                    )
+              
                             VStack{
                                 Text(leaders[0].teamName)
                                     .frame(width: geo.size.width * 0.25)
                                 Text("\(leaders[0].teamPoints)")
                             }
-                            .offset(y:20)
+//                            .offset(y:20)
                             .font(.custom("Rubik Bold", size: 10))
                             .foregroundColor(.white)
                         }
                         Spacer()
                         VStack{
-                            Image(uiImage: leaders[1].teamPic)
-                                .resizable()
-                                .centerCropped()
-                                .frame(width: geo.size.width * 0.2, height: geo.size.width * 0.2)
-                                .aspectRatio(contentMode: .fill)
-                                .clipShape(Circle())
-                                .overlay(
-                                    ZStack{
-                                        Circle().stroke(AppColor.lovolDarkerPurpleBackground,lineWidth:4)
-                                        VStack{
-                                            Spacer()
-                                            ZStack{
-                                                Circle().fill(.gray)
-                                                    .frame(width: geo.size.width * 0.1, height: geo.size.width * 0.1)
-                                                Text("2").font(.custom("Rubik Bold", size: 14)).foregroundColor(AppColor.lovolDarkerPurpleBackground
-                                                )
-                                          
-                                            }
-                                            .offset(y:20)
-                                        }
-                                    }
-                                )
+                            ZStack{
+                                Image(uiImage: leaders[1].teamPic)
+                                    .resizable()
+                                    .centerCropped()
+                                    .frame(width: geo.size.width * 0.2, height: geo.size.width * 0.2)
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                    
+                                VStack{
+                                    Image("wolfHat2")
+                                        .resizable()
+                                        .centerCropped()
+                                        .aspectRatio( contentMode: .fit)
+                                        .frame(width: geo.size.width * 0.2, height: geo.size.width * 0.2)
+                                    Spacer()
+
+                                }
+                            }
+           
                             VStack{
                                 Text(leaders[1].teamName)
                                     .frame(width: geo.size.width * 0.25)
                                 Text("\(leaders[1].teamPoints)")
                             }
-                            .offset(y:20)
+                            .offset(y:-40)
                             .font(.custom("Rubik Bold", size: 10))
                             .foregroundColor(.white)
                         }

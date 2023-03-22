@@ -38,11 +38,13 @@ struct MemberFrame: View {
     @State private var loadingRequests : Bool = true
     @State private var urlString : URL = URL(string: "https://lovolac.com")!
     
+    @State private var chosenRequest : AllianceModel = AllianceModel(groupId: "", teamName: "", teamDescription: "", memberModel: [], teamPic: UIImage())
+    @State private var showChosenRequest : Bool = false
     var body: some View {
         GeometryReader{ geo in
             VStack{
                 
-                if loadingTeamInfo || loadingRequests || loading{
+                if loadingTeamInfo  {
                     ProgressView()
                         .position(x:UIScreen.main.bounds.width/2,y: geo.size.height / 2)
                 }else{
@@ -52,40 +54,7 @@ struct MemberFrame: View {
                             ScrollView{
              
 //                                if !allianceInformation.count == 0 {
-                                    Section(header: ListHeader(text: "\(allianceInformation.count) \(allianceInformation.count == 1 ? "Alliance" : "Alliances")")){
-                                        //                                ScrollView{
-                                        
-                                        ForEach(allianceInformation, id: \.self){
-                                            alliance in
-                                            
-                                            Button {
-                                                
-                                            } label: {
-                                                NavigationLink(destination: AllianceFullFrameView(alliance: alliance)) {
-                                                    HStack{
-                                                        Image(uiImage: alliance.teamPic)
-                                                            .resizable()
-                                                            .centerCropped()
-                                                            .frame(width: geo.size.width * 0.15, height: geo.size.width * 0.15)
-                                                            .aspectRatio(contentMode: .fill)
-                                                            .clipShape(Circle())
-                                                        Text(alliance.teamName).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
-                                                        Spacer()
-                                                        Text("View Profile")
-                                                            .padding(5)
-                                                            .background(RoundedRectangle(cornerRadius: 30).fill(.white).opacity(0.6))
-                                                            .font(.custom("Rubik Regular", size: 10)).foregroundColor(AppColor.lovolDarkerPurpleBackground)
-                                                        
-                                                        
-                                                    }
-                                                    
-                                                }
-                                            }
-                                            
-                                        }
-                                        
-                                    }
-                                    .frame(width:geo.size.width )
+
 //                                }
                                 
                                 Section(header: ListHeader(text: "\(members.count) \(members.count == 1 ? "Member" : "Team Members")")){
@@ -128,74 +97,7 @@ struct MemberFrame: View {
                                     //                            }
                                 }
                                 .frame(width:geo.size.width )
-                                Section(header: ListHeader(text: "Requests")){
-                                    if !requests.isEmpty{
-                                        VStack{
-                                            ForEach(requests.indices, id: \.self){
-                                                member in
-                                                
-                                                HStack{
-                                                    Image(uiImage: requests[member].pic)
-                                                        .resizable()
-                                                        .centerCropped()
-                                                        .frame(width: geo.size.width * 0.15, height: geo.size.width * 0.15)
-                                                        .aspectRatio(contentMode: .fill)
-                                                        .clipShape(Circle())
-                                                    VStack{
-                                                        HStack{
-                                                            Text(requests[member].request.nameOfSender).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
-                                                            Spacer()
-                                                        }
-                                                        HStack{
-                                                            Text(requests[member].request.sendRole).font(.custom("Rubik Regular", size: 10)).foregroundColor(.white).opacity(0.7)
-                                                            Spacer()
-                                                        }
-                                                        
-                                                    }
-                                                    if requests[member].request.isATeam{
-                                                        
-                                                        Button {
-                                                            
-                                                        } label: {
-                                                            
-                                                            NavigationLink(destination: AllianceFullFrameView(alliance:requestDic[member]!)) {
-                                                                Text("View").font(.custom("Rubik Regular", size: 10)).foregroundColor(AppColor.lovolDarkerPurpleBackground
-                                                                ).padding(5)
-                                                                    .background(RoundedRectangle(cornerRadius:30).fill(.white.opacity(0.6)))
-                                                            }
-                                                            
-                                                        }
-                                                        
-                                                    }
-                                                    Spacer()
-                                                    Button {
-                                                        cancelRequest(index:member)
-                                                    } label: {
-                                                        Image(systemName: "person.fill.xmark")
-                                                            .foregroundColor(.white)
-                                                    }
-                                                    .padding(.horizontal)
-                                                    Button {
-                                                        acceptRequest(index:member)
-                                                    } label: {
-                                                        Image(systemName: "person.fill.checkmark")
-                                                            .foregroundColor(.white)
-                                                        
-                                                        
-                                                    }
-                                                    
-                                                    
-                                                    
-                                                }
-                                                
-                                            }
-                                        }
-                                        
-                                        
-                                    }
-                                    
-                                }
-                                .frame(width:geo.size.width)
+        
                                 
                             //section
                                
@@ -207,6 +109,9 @@ struct MemberFrame: View {
         
 
     }
+            .fullScreenCover(isPresented: $showChosenRequest, content: {
+                AllianceFullFrameView(alliance:$chosenRequest)
+            })
 
 //    .frame(height:geo.size.height )
 
@@ -233,21 +138,7 @@ struct MemberFrame: View {
 //    func sendRequest(){
 //        profileViewModel.sendAllianceRequest(id: searchString, sendingTeam: teamInfo)
 //    }
-    func fetchAlliances(){
-        profileViewModel.fetchAllianceTeamPics(groupIDS: teamInfo.alliances) { result in
-            switch result {
-                
-            case .success(let fetchedAlliances):
-                self.allianceInformation = fetchedAlliances
-                loading = false
-            case .failure(let error):
-                print("error fetching alliances \(error)")
-                return
-                
-            }
-        }
-        
-    }
+
     private func cancelRequest(index: Int ){
         requestViewModel.cancelRequest(id: requests[index].request.id) {
             requests.remove(at: index)
@@ -269,8 +160,8 @@ struct MemberFrame: View {
     private func onAppear(){
         self.alliances = teamInfo.alliances
         fillInInfo(team: teamInfo)
-        fillRequests(groupId: groupId)
-        fetchAlliances()
+//        fillRequests(groupId: groupId)
+//        fetchAlliances()
         firestoreViewModel.shareTapped(groupId) { url in
             self.urlString = url
         }

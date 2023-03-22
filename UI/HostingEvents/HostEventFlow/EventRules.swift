@@ -19,7 +19,10 @@ struct EventRules: View {
             .padding()
 //                                .fixedSize()
             .placeholder(when: eventRules.isEmpty) {
-            Text("").opacity(0.5).font(.custom("Rubik Regular", size: 28)).foregroundColor(.white)
+            Text("Add Event Rules").opacity(0.5).font(.custom("Rubik Regular", size: 12)).foregroundColor(.white)
+                    .padding()
+                    .padding()
+
         }.onChange(of: eventRules, perform: {newValue in
             if(newValue.count >= charLimit){
                 eventRules = String(newValue.prefix(charLimit))

@@ -10,6 +10,7 @@ import SwiftUI
 struct SingleEventView: View {
 
 
+    @Binding var selection : Int
     @EnvironmentObject private var eventViewModel: EventViewModel
     @EnvironmentObject private var profileViewModel: ProfilesViewModel
     
@@ -66,8 +67,8 @@ struct SingleEventView: View {
     
     @State private var notInGroupError : Bool = false
     
-    
-    
+    @State private var isTeamViewActive = false
+
 
     var body: some View {
         
@@ -90,48 +91,57 @@ struct SingleEventView: View {
 //                        Spacer()
                         
                         if notInGroupError{
-                            HStack{
-                                Spacer()
-                                Text("Join or create a group to see what events are available!")
-                                    .font(.custom("Rubik Regular", size: 22)).foregroundColor(.white)
+                            Button {
+                                selection = 4
+                            } label: {
+                          
+                                Text("Join or create a group to gain points.")
+                                    .font(.custom("Rubik Regular", size: 14))
+                                    .foregroundColor(.white)
                                     .padding()
-                                Spacer()
+                                Image(systemName:"chevron.right")
+                                    .foregroundColor(.white)
                             }
+
+                
                         }
                         ScrollView{
                             
                   
 
                             
-                            CollectionHeaderView(eventDictionary: eventDictionary,locationSet:locationSet,long:long,lat:lat)
+                            CollectionHeaderView(inGroupError: notInGroupError,eventDictionary: eventDictionary,locationSet:locationSet,long:long,lat:lat)
                                 .frame(height:geo.size.height * 0.17)
                             ExDivider(color: .white.opacity(0.4))
                                 .padding(.top,20)
                             TagsHeaderView(chosenTag: $chosenFilter, filterChosen: $filterChosen)
-                                .frame(height:geo.size.height * 0.12)
-                            FilterEventView(reset: $reset, filterChosen: $filterChosen)
-                                .frame(height:geo.size.height * 0.09)
-                                .padding(.vertical,15)
+                                .frame(height:geo.size.height * 0.2)
+//                            FilterEventView(reset: $reset, filterChosen: $filterChosen)
+//                                .frame(height:geo.size.height * 0.09)
+//                                .padding(.vertical,15)
 //                            HStack{
                                 ScrollView(.horizontal){
                                     HStack{
+                                        Spacer()
                                         GameShowLabelView()
                                             .frame(width:geo.size.width * 0.85)
                                             .padding(.leading,10)
                                         
                                             .padding(.trailing,10)
-//                                        Spacer()
-                                        BonusRoundView()
-                                            .frame(width:geo.size.width * 0.85)
-                                            .padding(.leading,10)
-//                                        Spacer()
-                                            .padding(.trailing,30)
                                         
+//                                        Spacer()
+//                                        BonusRoundView()
+//                                            .frame(width:geo.size.width * 0.85)
+//                                            .padding(.leading,10)
+////                                        Spacer()
+//                                            .padding(.trailing,30)
+                                        Spacer()
                                     }
                                     
                                 }
                                 .frame(height:geo.size.height * 0.2)
                                 .scrollIndicators(.hidden)
+                                .padding(.vertical,15)
 
 //                            }
                             
@@ -156,13 +166,13 @@ struct SingleEventView: View {
                                 if filterChosen{
                                     
                                     if eventsFiltered.isEmpty {
-                                        LabelEventView(events:eventsFiltered  , heder: "No Results",locationSet:locationSet, long:long,lat:lat  )
+                                        LabelEventView(inGroupError:notInGroupError,events:$eventsFiltered  , heder: "No Results",locationSet:locationSet, long:long,lat:lat  )
                                             .frame(height:geo.size.height * 0.40)
-                                            .padding(.bottom, 15)
+                                            .padding(.bottom, 30)
                                     }else{
-                                        LabelEventView(events:eventsFiltered  , heder: "Nearby Events",locationSet:locationSet, long:long,lat:lat  )
+                                        LabelEventView(inGroupError:notInGroupError,events:$eventsFiltered  , heder: "\(chosenFilter)",locationSet:locationSet, long:long,lat:lat  )
                                             .frame(height:geo.size.height * 0.40)
-                                            .padding(.bottom, 15)
+                                            .padding(.bottom, 30)
                                     }
                                     
                                 }else{
@@ -182,12 +192,13 @@ struct SingleEventView: View {
                                             .frame(width:geo.size.width * 0.9)
                             //                .padding(.vertical)
                                             
-                                            LabelEventView(events: headLiners[index].events, heder: headLiners[index].header,locationSet:locationSet, long:long,lat:lat  )
+                                            LabelEventView(inGroupError:notInGroupError,events: $headLiners[index].events, heder: headLiners[index].header,locationSet:locationSet, long:long,lat:lat  )
                                                 .frame(height:geo.size.height * 0.40)
-                                                .padding(.bottom, 15)
+                                                .padding(.bottom, 30)
                                         }
                
                                     }
+                                    .padding(.bottom,20)
                                 }
 
                             }
@@ -241,8 +252,10 @@ struct SingleEventView: View {
             .onChange(of: chosenFilter) { newValue in
 //                if filterChosen {
                     
+                print("CHanging filter to \(newValue)")
                     self.filterLoading = true
-                    
+//                    self.filterChosen = false
+
                     filterTagEvents()
                     
 //                }
@@ -261,22 +274,31 @@ struct SingleEventView: View {
 //
 //    }
     private func filterTagEvents(){
-        
-  
-        
-        self.filteredEvents = allEvents.filter({
+
+        if chosenFilter == "Trending" {
             
-            $0.value.eventTags.contains(chosenFilter)
+            self.eventsFiltered = eventsWaitingToBeFiltered.filter({
+//                print("found a temp event")
+                
+                $0.isTempEvent
+                
+            })
+           if  self.eventsFiltered.isEmpty{
+                print("is empty")
+            }
+            self.eventsFiltered.sort {
+                $0.totalRSVP ?? 0 > $1.totalRSVP ?? 0
+            }
             
-            
-        })
-        self.eventsFiltered = eventsWaitingToBeFiltered.filter({
-            
-            $0.eventTags.contains(chosenFilter)
-  
-        })
-        
-        
+        }else{
+            self.eventsFiltered = eventsWaitingToBeFiltered.filter({
+                
+                $0.eventTags.contains(chosenFilter)
+                
+      
+            })
+        }
+
         self.filterLoading = false
         
     }
@@ -331,10 +353,11 @@ struct SingleEventView: View {
                     switch result {
                         
                     case .success(let team):
-                        self.savedEvents = team.suggestedEvents
+//                        self.savedEvents = team.suggestedEvents
                         self.locationSet = team.locationSet
                         self.address = team.address
-                        
+                        self.notInGroupError = false
+
                         eventsWaitingToBeFiltered.removeAll()
                         allEvents.removeAll()
                         if locationSet {
@@ -361,7 +384,7 @@ struct SingleEventView: View {
                             }
                         }else{
                             print("location not sest")
-                        }
+                        } 
                         eventViewModel.fetchEvents(groupId:team.id,locationSet: locationSet, long:long,lat:lat) { result in
                             switch result {
                             case .success(let events ):
@@ -377,7 +400,27 @@ struct SingleEventView: View {
 //                        return
                     case .failure(.parsingError):
                         print("not a part of a group")
-                        return
+                        self.locationSet = false
+                        self.address = ""
+                        self.long = 0
+                        self.lat = 0 
+                        self.notInGroupError = true
+                        eventsWaitingToBeFiltered.removeAll()
+                        allEvents.removeAll()
+                        eventViewModel.fetchEvents(groupId:"",locationSet: false, long:long,lat:lat) { result in
+                            switch result {
+                            case .success(let events ):
+                                
+                                filterEvents(events:events,headLiner: headLiners)
+
+                            case .failure(let error):
+                                print("error downloading information \(error)")
+                                showLoadingError = true
+                                return
+                            }
+                        }
+                        
+//                        return
                         
                     case .failure(.downloadError):
                         print("could not fetch documents")
@@ -421,18 +464,18 @@ struct SingleEventView: View {
                     if completedEvents[event].eventType == "Local" {
                         localEvents[completedEvents[event].id]?.eventCompleted = true
                     }
-                    if completedEvents[event].eventType == "Virtual" {
-                        virtualEvents[completedEvents[event].id]?.eventCompleted = true
-                    }
-                    if completedEvents[event].eventType == "21+" {
+//                    if completedEvents[event].eventType == "Virtual" {
+//                        virtualEvents[completedEvents[event].id]?.eventCompleted = true
+//                    }
+                    if completedEvents[event].eventType == "Adult" {
                         adultEvents[completedEvents[event].id]?.eventCompleted = true
                     }
-                    if completedEvents[event].eventType == "Couples" {
-                        couplesEvents[completedEvents[event].id]?.eventCompleted = true
-                    }
-                    if completedEvents[event].eventType == "After Dark" {
-                        afterDarkEvents[completedEvents[event].id]?.eventCompleted = true
-                    }
+//                    if completedEvents[event].eventType == "Couples" {
+//                        couplesEvents[completedEvents[event].id]?.eventCompleted = true
+//                    }
+//                    if completedEvents[event].eventType == "After Dark" {
+//                        afterDarkEvents[completedEvents[event].id]?.eventCompleted = true
+//                    }
                 }
                 for event in savedEvents {
                     
@@ -449,18 +492,19 @@ struct SingleEventView: View {
                     if  value.eventType == "Local" {
                         localEvents[value.id] = value
                     }
-                    if value.eventType == "Virtual" {
-                        virtualEvents[value.id] = value
-                    }
+//                    if value.eventType == "Virtual" {
+//                        virtualEvents[value.id] = value
+//                    }
                     if  value.eventType == "Adult" {
+//                        print("ADULT EVENT HERE")
                         adultEvents[value.id] = value
                     }
-                    if value.eventType == "Couples" {
-                        couplesEvents[value.id] = value
-                    }
-                    if  value.eventType == "After Dark" {
-                        afterDarkEvents[value.id] = value
-                    }
+//                    if value.eventType == "Couples" {
+//                        couplesEvents[value.id] = value
+//                    }
+//                    if  value.eventType == "After Dark" {
+//                        afterDarkEvents[value.id] = value
+//                    }
                 }
                 var eventsModel : [EventModel] = []
 
@@ -479,10 +523,10 @@ struct SingleEventView: View {
                 }
                 self.eventDictionary["Home"] = homeEvents
                 self.eventDictionary["Local"] = localEvents
-                self.eventDictionary["Virtual"] = virtualEvents
+//                self.eventDictionary["Virtual"] = virtualEvents
                 self.eventDictionary["Adult"] = adultEvents
-                self.eventDictionary["Couples"] = couplesEvents
-                self.eventDictionary["AfterDark"] = afterDarkEvents
+//                self.eventDictionary["Couples"] = couplesEvents
+//                self.eventDictionary["AfterDark"] = afterDarkEvents
                 loading = false
 
             case .failure(let error):
@@ -501,10 +545,10 @@ struct SingleEventView: View {
             
 }
 
-struct SingleEventView_Previews: PreviewProvider {
-    static var previews: some View {
-        SingleEventView()
-    }
-}
+//struct SingleEventView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SingleEventView()
+//    }
+//}
 
 //[EventModel(id: "", eventName: "Chimmiganggas night", eventDescription: "This is going to be the best place to get chimmichangas yall better come", eventRules: "", eventLocation: "", eventAverageCost: 30, eventTime: 30, eventPoints: 30, eventType: "Home", eventMonth: "0", eventCompleted: false, eventURL: ""),EventModel(id: "", eventName: "Chimmiganggas night", eventDescription: "This is going to be the best place to get chimmichangas yall better come", eventRules: "", eventLocation: "", eventAverageCost: 30, eventTime: 30, eventPoints: 30, eventType: "Home", eventMonth: "0", eventCompleted: false, eventURL: "")]

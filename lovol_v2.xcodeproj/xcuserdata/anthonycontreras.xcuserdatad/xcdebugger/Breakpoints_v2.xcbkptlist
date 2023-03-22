@@ -16,5 +16,33 @@
             categories = "Security">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            uuid = "81EA3B9F-3AF1-472D-99D6-8FD81B763693"
+            shouldBeEnabled = "Yes"
+            nameForDebugger = "UIViewAlertForUnsatisfiableConstraints"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = ""
+            moduleName = "">
+            <Locations>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            uuid = "90B8CC49-B48B-4047-A6BF-DBD25E6DAA08"
+            shouldBeEnabled = "No"
+            nameForDebugger = "UIViewAlertForUnsatisfiableConstraints"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = ""
+            moduleName = "">
+            <Locations>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

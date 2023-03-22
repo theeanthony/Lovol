@@ -81,7 +81,7 @@ struct EditSoloProfileView: View {
                                     .font(.custom("Rubik Bold", size: 12))
                                     .foregroundColor(.white)
                                     .padding(10)
-                                    .background(RoundedRectangle(cornerRadius: 30).fill(AppColor.lovolDarkerPurpleBackground))
+                                    .background(RoundedRectangle(cornerRadius: 30).fill(AppColor.lovolPinkish))
                             }
                             .padding()
 
@@ -201,7 +201,7 @@ struct EditSoloProfileView: View {
                                 .foregroundColor(.white)
                                 .padding()
                                 .frame(width:geo.size.width * 0.7)
-                                .background(RoundedRectangle(cornerRadius: 30).fill(AppColor.lovolDarkerPurpleBackground))
+                                .background(RoundedRectangle(cornerRadius: 30).fill(AppColor.lovolPinkish))
                         }
                         .padding(.bottom,15)
                     }
