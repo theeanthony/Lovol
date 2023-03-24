@@ -27,11 +27,11 @@ When you choose an event, a fullscreen comes up to give you details of the event
 <img src="https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG" width="500">
 
 Then when you are ready to take a photo with your team, you press submit, and take 1 - 6 pictures and or videos, showing that you did the event 
-<img src="https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG" width="500">
+<img src="![IMG_0389](https://user-images.githubusercontent.com/61211404/227604921-f10be3a2-41b7-4f8c-9193-fcaf7cdd72dc.PNG)" width="500">
 
 When you are ready to submit your photos, you then go into another page where you can write a caption, and choose whether or not to submit the photo 
 to the global section where everyone can see. The default is just for other friendly teams. 
-<img src="https://user-images.githubusercontent.com/61211404/227405589-0a948b4b-5a35-4715-997a-6b799947c5da.PNG" width="500">
+<img src="![IMG_0403](https://user-images.githubusercontent.com/61211404/227605188-1e3aa6e2-c57f-4dfc-b2af-91efb60e29c2.PNG)" width="500">
 
 Then when you confirm, an animation of confetti comes out and you can rate the event. 
 <img src="https://user-images.githubusercontent.com/61211404/227405647-a33a6036-02f7-4794-b383-9d3843f596fd.PNG" width="500">
