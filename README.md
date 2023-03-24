@@ -2,7 +2,7 @@
 This is an app to host a mobile gameshow. 
 
 When the user first installs the app they will be introduced to the sign in. 
-![IMG_0401](https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG)
+<img src="https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG" width="500">
 
 New users can sign up by pressing sign up button. Which will then take them to the sign up screen. 
 ![IMG_0402](https://user-images.githubusercontent.com/61211404/227404348-402657b4-5296-46b7-9340-d0ca34f3dd68.PNG)
