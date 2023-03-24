@@ -1,5 +1,5 @@
 # Lovol
-This is an app to host a mobile gameshow. 
+This is an app to host a mobile gameshow. You can download the app here to play around with it. https://testflight.apple.com/join/OpwpOtaM
 
 When the user first installs the app they will be introduced to the sign in. 
 <img src="https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG" width="500">
