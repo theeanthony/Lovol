@@ -24,11 +24,9 @@ and corresponding events. There are also hosted events made by teams that are lo
 
 
 When you choose an event, a fullscreen comes up to give you details of the event. 
-![IMG_0387](https://user-images.githubusercontent.com/61211404/227405101-f1052e0a-b8c0-41ca-b569-096a5e84fc32.PNG)
 <img src="https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG" width="500">
 
 Then when you are ready to take a photo with your team, you press submit, and take 1 - 6 pictures and or videos, showing that you did the event 
-![IMG_0389](https://user-images.githubusercontent.com/61211404/227405249-a67f33af-371d-4dd3-92ad-f0a06ad5b1dc.PNG)
 <img src="https://user-images.githubusercontent.com/61211404/227404278-012c2284-df22-43f6-90c5-ac50e20cde82.PNG" width="500">
 
 When you are ready to submit your photos, you then go into another page where you can write a caption, and choose whether or not to submit the photo 
