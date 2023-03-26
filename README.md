@@ -3,6 +3,7 @@ This is an app to host a mobile gameshow. You can download the app here to play 
 sign in information is 
 email : recruiter@gmail.com
 password: password 
+
 https://testflight.apple.com/join/OpwpOtaM
 
 When the user first installs the app they will be introduced to the sign in. 
